@@ -37,6 +37,17 @@ export async function addAssignment(page, routinePath, day, exercise, targets) {
   await expect(page.getByRole('region', { name: weekdayName(day), exact: true })).toBeVisible()
 }
 
+export async function uploadExerciseImage(page) {
+  const encoded = await page.evaluate(() => {
+    const canvas = document.createElement('canvas')
+    canvas.width = canvas.height = 4
+    canvas.getContext('2d').fillRect(0, 0, 4, 4)
+    return canvas.toDataURL('image/png').split(',')[1]
+  })
+  await page.locator('input[type=file]').setInputFiles({ name: 'exercise.png', mimeType: 'image/png', buffer: Buffer.from(encoded, 'base64') })
+  await expect.poll(() => page.locator('.image-upload img').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+}
+
 export async function expectProgress(page, completed, scheduled, consistency) {
   // Assert the announced counts as well as the displayed consistency.
   const summary = page.locator('.weekly-progress__summary')

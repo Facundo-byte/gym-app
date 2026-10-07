@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises'
-import { test, expect, activate, expectNoOverflow } from './helpers.js'
+import { test, expect, activate, createRoutine, uploadExerciseImage, expectNoOverflow } from './helpers.js'
 import { createEmptyDocument, STORAGE_KEY } from '../src/services/storage.js'
 import { createStarterDocument } from '../src/services/starterExercises.js'
 
@@ -20,6 +20,52 @@ async function failWrites(page, fail) {
     window.fixtureWriteFailure = fail
   }, { key: STORAGE_KEY, fail })
 }
+
+test('empty-library routine creation retains drafts after quota failure and blocks nonexistent routine days', async ({ page }) => {
+  await page.goto('/exercises')
+  await expect(page.locator('.exercise-card')).toHaveCount(9)
+  await page.evaluate(({ key, document }) => localStorage.setItem(key, JSON.stringify(document)), { key: STORAGE_KEY, document: createEmptyDocument() })
+  await page.reload()
+  const routinePath = await createRoutine(page, 'Empty library plan', [1])
+  const assignmentPath = `${routinePath}/days/1/assignments/new`
+  await page.goto(assignmentPath)
+  await expect(page.getByText('Your exercise library is empty', { exact: true })).toBeVisible()
+  await page.getByLabel('Sets', { exact: true }).fill('3')
+  await page.getByLabel('Reps', { exact: true }).fill('10')
+  await page.getByLabel('Target weight (kg)', { exact: true }).fill('0')
+  const original = await raw(page)
+  await activate(page, page.getByRole('link', { name: 'Create exercise', exact: true }))
+  await page.getByLabel('Exercise name', { exact: true }).fill('Quota row')
+  await page.getByLabel('Target muscle', { exact: true }).selectOption('Back')
+  await uploadExerciseImage(page)
+  await failWrites(page, true)
+  await activate(page, page.getByRole('button', { name: 'Create exercise', exact: true }))
+  await expect(page.locator('.exercise-form [role=alert]')).toContainText('Browser storage is full')
+  await expect(page).toHaveURL(`${assignmentPath}/exercises/new`)
+  await expect(page.getByLabel('Exercise name', { exact: true })).toHaveValue('Quota row')
+  expect(await raw(page)).toBe(original)
+  await activate(page, page.getByRole('link', { name: 'Back to Add exercise', exact: true }))
+  await expect(page.getByRole('radio')).toHaveCount(0)
+  await expect(page.getByLabel('Sets', { exact: true })).toHaveValue('3')
+  expect(await raw(page)).toBe(original)
+  await activate(page, page.getByRole('link', { name: 'Create exercise', exact: true }))
+  await page.getByLabel('Exercise name', { exact: true }).fill('Saved row')
+  await page.getByLabel('Target muscle', { exact: true }).selectOption('Back')
+  await failWrites(page, false)
+  await activate(page, page.getByRole('button', { name: 'Create exercise', exact: true }))
+  await expect(page.getByRole('radio', { name: 'Saved row Back', exact: true })).toBeChecked()
+  await expect(page.getByLabel('Target weight (kg)', { exact: true })).toHaveValue('0')
+  await activate(page, page.getByRole('button', { name: 'Add to training day', exact: true }))
+  await expect(page.locator('.assignment-row')).toContainText('Saved row')
+  await page.reload()
+  await expect(page.locator('.assignment-row')).toContainText('Saved row')
+  for (const path of [`${routinePath}/days/5/assignments/new/exercises/new`, '/routines/missing/days/1/assignments/new/exercises/new']) {
+    await page.goto(path)
+    await expect(page.getByRole('heading', { name: 'Training day or assignment not found', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Create exercise', exact: true })).toHaveCount(0)
+    await expectNoOverflow(page)
+  }
+})
 
 test('bundled starter images preserve legacy storage and personal uploads can return to defaults', async ({ page }, testInfo) => {
   await page.clock.setFixedTime(new Date('2026-10-07T15:00:00Z'))

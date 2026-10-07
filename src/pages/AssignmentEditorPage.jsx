@@ -1,5 +1,5 @@
 import { useLanguage } from '../i18n/useLanguage.js'
-import { useParams } from 'react-router'
+import { useOutletContext, useParams } from 'react-router'
 import { useStorage } from '../app/useStorage.js'
 import { weekdayName } from '../domain/routines.js'
 import PageHeader from '../components/PageHeader.jsx'
@@ -11,6 +11,7 @@ import { ButtonLink } from '../components/Button.jsx'
 export default function AssignmentEditorPage() {
   const { t } = useLanguage()
   const { id, dayOfWeek, assignmentId } = useParams()
+  const creationFlow = useOutletContext()
   const { status, data } = useStorage()
   const routine = data?.routines.find((item) => item.id === id)
   const day = routine?.days.find((item) => item.dayOfWeek === Number(dayOfWeek))
@@ -24,7 +25,7 @@ export default function AssignmentEditorPage() {
       {status === 'error' && <Card className="page-body"><EmptyState title={t("Saving is unavailable")} description={t("Resolve the storage issue above to continue.")}><ButtonLink to="/routines">{t("Back to routines")}</ButtonLink></EmptyState></Card>}
       {status === 'ready' && (!valid ? (
         <Card className="page-body"><EmptyState title={t("Training day or assignment not found")} description={t("This item may have been removed. Return to your routine and choose an available training day.")}><ButtonLink to={backPath}>{t("Back to routine")}</ButtonLink></EmptyState></Card>
-      ) : data.exercises.length ? <AssignmentForm key={`${id}:${dayOfWeek}:${assignmentId ?? 'new'}`} routine={routine} day={day} assignment={assignment} exercises={data.exercises} /> : (
+      ) : data.exercises.length || creationFlow ? <AssignmentForm key={`${id}:${dayOfWeek}:${assignmentId ?? 'new'}`} routine={routine} day={day} assignment={assignment} exercises={data.exercises} creationFlow={creationFlow} /> : (
         <Card className="page-body"><EmptyState title={t("Your exercise library is empty")} description={t("Create an exercise in your library before adding one to this training day.")}><ButtonLink to="/exercises">{t("Open exercise library")}</ButtonLink><ButtonLink variant="text" to={backPath}>{t("Back to routine")}</ButtonLink></EmptyState></Card>
       ))}
     </div>

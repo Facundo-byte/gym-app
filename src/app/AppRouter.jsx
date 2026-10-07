@@ -7,6 +7,7 @@ import ExerciseEditorPage from '../pages/ExerciseEditorPage.jsx'
 import RoutineDetailPage from '../pages/RoutineDetailPage.jsx'
 import RoutineEditorPage from '../pages/RoutineEditorPage.jsx'
 import AssignmentEditorPage from '../pages/AssignmentEditorPage.jsx'
+import AssignmentCreationFlow from './AssignmentCreationFlow.jsx'
 import LoginPage from '../pages/LoginPage.jsx'
 import NotFoundPage from '../pages/NotFoundPage.jsx'
 
@@ -19,7 +20,10 @@ export default function AppRouter() {
         <Route path="routines/new" element={<RoutineEditorPage />} />
         <Route path="routines/:id" element={<RoutineDetailPage />} />
         <Route path="routines/:id/edit" element={<RoutineEditorPage />} />
-        <Route path="routines/:id/days/:dayOfWeek/assignments/new" element={<AssignmentEditorPage />} />
+        <Route path="routines/:id/days/:dayOfWeek/assignments/new" element={<AssignmentCreationFlow />}>
+          <Route index element={<AssignmentEditorPage />} />
+          <Route path="exercises/new" element={<ExerciseEditorPage />} />
+        </Route>
         <Route path="routines/:id/days/:dayOfWeek/assignments/:assignmentId/edit" element={<AssignmentEditorPage />} />
         <Route path="exercises" element={<ExercisesPage />} />
         <Route path="exercises/new" element={<ExerciseEditorPage />} />

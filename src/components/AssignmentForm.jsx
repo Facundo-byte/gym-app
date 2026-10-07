@@ -8,11 +8,13 @@ import ExercisePicker from './ExercisePicker.jsx'
 import TextField from './TextField.jsx'
 import { Button, ButtonLink } from './Button.jsx'
 
-export default function AssignmentForm({ routine, day, assignment, exercises }) {
+export default function AssignmentForm({ routine, day, assignment, exercises, creationFlow }) {
   const { t } = useLanguage()
   const { saveAssignment } = useStorage()
   const navigate = useNavigate()
-  const [draft, setDraft] = useState({ exerciseId: assignment?.exerciseId ?? '', sets: assignment ? String(assignment.sets) : '', reps: assignment ? String(assignment.reps) : '', targetWeight: assignment ? String(assignment.targetWeight) : '' })
+  const [localDraft, setLocalDraft] = useState({ exerciseId: assignment?.exerciseId ?? '', sets: assignment ? String(assignment.sets) : '', reps: assignment ? String(assignment.reps) : '', targetWeight: assignment ? String(assignment.targetWeight) : '' })
+  const draft = creationFlow?.draft ?? localDraft
+  const setDraft = creationFlow?.setDraft ?? setLocalDraft
   const [errors, setErrors] = useState({})
   const [saveError, setSaveError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -58,7 +60,7 @@ export default function AssignmentForm({ routine, day, assignment, exercises }) 
 
   return (
     <form className="assignment-form" noValidate onSubmit={submit} aria-busy={saving}>
-      <ExercisePicker exercises={exercises} value={draft.exerciseId} onChange={(exerciseId) => update('exerciseId', exerciseId)} error={errors.exerciseId} disabled={saving} firstInputRef={exerciseRef} searchRef={searchRef} />
+      <ExercisePicker exercises={exercises} value={draft.exerciseId} onChange={(exerciseId) => update('exerciseId', exerciseId)} error={errors.exerciseId} disabled={saving} firstInputRef={exerciseRef} searchRef={searchRef} creationFlow={creationFlow} />
       <div className="assignment-targets">
         <TextField label={t("Sets")} type="number" inputMode="numeric" min="1" step="1" placeholder="4" value={draft.sets} onChange={(event) => update('sets', event.target.value)} error={errors.sets} required disabled={saving} ref={setsRef} />
         <TextField label={t("Reps")} type="number" inputMode="numeric" min="1" step="1" placeholder="8" value={draft.reps} onChange={(event) => update('reps', event.target.value)} error={errors.reps} required disabled={saving} ref={repsRef} />

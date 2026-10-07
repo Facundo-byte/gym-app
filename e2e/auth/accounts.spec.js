@@ -1,4 +1,4 @@
-import { test, expect, activate, createRoutine, addAssignment, expectProgress, expectNoOverflow, captureReview } from '../helpers.js'
+import { test, expect, activate, createRoutine, addAssignment, uploadExerciseImage, expectProgress, expectNoOverflow, captureReview } from '../helpers.js'
 import { accounts, installProvider } from './provider.js'
 
 test('Spanish account forms, provider errors and import summary survive sign-in and logout', async ({ page, context }, testInfo) => {
@@ -63,6 +63,79 @@ async function uploadPixels(page) {
   })
   await page.locator('input[type=file]').setInputFiles({ name: 'cloud.png', mimeType: 'image/png', buffer: Buffer.from(encoded, 'base64') })
 }
+
+test('routine exercise creation uses account persistence, retains failed drafts and guards return during a pending save', async ({ page, context, browser }, testInfo) => {
+  const backend = await installProvider(context)
+  await signIn(page, accounts.a)
+  const routinePath = await createRoutine(page, 'Account creation plan', [1, 5])
+  const assignmentPath = `${routinePath}/days/5/assignments/new`
+  await page.goto(assignmentPath)
+  await page.getByLabel('Sets', { exact: true }).fill('3')
+  await page.getByLabel('Reps', { exact: true }).fill('10')
+  await page.getByLabel('Target weight (kg)', { exact: true }).fill('12.5')
+  await activate(page, page.getByRole('link', { name: 'Create exercise', exact: true }))
+  await page.getByLabel('Exercise name', { exact: true }).fill('Account cable row')
+  await page.getByLabel('Target muscle', { exact: true }).selectOption('Back')
+  await uploadExerciseImage(page)
+  const original = backend.rows.get(accounts.a.id).document
+  backend.failSave = true
+  await activate(page, page.getByRole('button', { name: 'Create exercise', exact: true }))
+  await expect(page.locator('.exercise-form [role=alert]')).toContainText('could not be confirmed')
+  await expect(page).toHaveURL(`${assignmentPath}/exercises/new`)
+  await expect(page.getByLabel('Exercise name', { exact: true })).toHaveValue('Account cable row')
+  expect(backend.rows.get(accounts.a.id).document).toEqual(original)
+  backend.failSave = false
+
+  let releaseSave
+  let markStarted
+  const gate = new Promise(resolve => { releaseSave = resolve })
+  const started = new Promise(resolve => { markStarted = resolve })
+  const saveURL = 'https://account-fixture.supabase.co/rest/v1/rpc/forge_save_document'
+  const holdSave = async route => { markStarted(); await gate; await route.fallback() }
+  await context.route(saveURL, holdSave)
+  try {
+    await activate(page, page.getByRole('button', { name: 'Create exercise', exact: true }))
+    await started
+    const back = page.getByRole('link', { name: 'Back to Add exercise', exact: true })
+    await expect(back).toHaveAttribute('aria-disabled', 'true')
+    await expect(page.getByRole('link', { name: 'Cancel', exact: true })).toHaveAttribute('aria-disabled', 'true')
+    await back.focus()
+    await page.keyboard.press('Enter')
+    await expect(page).toHaveURL(`${assignmentPath}/exercises/new`)
+    releaseSave()
+    await expect(page).toHaveURL(assignmentPath)
+  } finally {
+    releaseSave()
+    await context.unroute(saveURL, holdSave)
+  }
+  await expect(page.getByRole('radio', { name: 'Account cable row Back', exact: true })).toBeChecked()
+  await expect(page.getByLabel('Target weight (kg)', { exact: true })).toHaveValue('12.5')
+  await activate(page, page.getByRole('button', { name: 'Add to training day', exact: true }))
+  await expect(page.locator('.assignment-row')).toContainText('Account cable row')
+  const saved = backend.rows.get(accounts.a.id).document
+  const exercise = saved.exercises.at(-1)
+  expect(exercise.name).toBe('Account cable row')
+  expect(saved.exercises).toHaveLength(original.exercises.length + 1)
+  expect(saved.routines[0].days.find(day => day.dayOfWeek === 5).assignments[0]).toMatchObject({ exerciseId: exercise.id, sets: 3, reps: 10, targetWeight: 12.5 })
+  expect(saved.routines[0].days.find(day => day.dayOfWeek === 1).assignments).toEqual([])
+  expect(backend.objects.size).toBe(1)
+  await page.reload()
+  await expect(page.locator('.assignment-row')).toContainText('Account cable row')
+  await expect.poll(() => page.locator('.assignment-row img').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+  await expectNoOverflow(page)
+  await captureReview(page, testInfo, 'account-created-exercise-assigned')
+
+  const otherContext = await browser.newContext({ baseURL: 'http://127.0.0.1:4176' })
+  try {
+    await installProvider(otherContext, backend)
+    const other = await otherContext.newPage()
+    await signIn(other, accounts.b)
+    await other.goto(`${assignmentPath}/exercises/new`)
+    await expect(other.getByRole('heading', { name: 'Training day or assignment not found', exact: true })).toBeVisible()
+    await other.goto('/exercises')
+    await expect(other.getByRole('link', { name: 'Edit Account cable row', exact: true })).toHaveCount(0)
+  } finally { await otherContext.close() }
+})
 
 test('login validation/error, signup confirmation, recovery email, protected password page and guest continuation', async ({ page, context }, testInfo) => {
   const backend = await installProvider(context)

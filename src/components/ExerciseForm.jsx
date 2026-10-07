@@ -1,5 +1,5 @@
 import { useLanguage } from '../i18n/useLanguage.js'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useStorage } from '../app/useStorage.js'
 import { MUSCLES, countExerciseAssignments, validateExerciseInput } from '../domain/exercises.js'
@@ -9,7 +9,7 @@ import { getDefaultExerciseImage } from '../config/defaultExercises.js'
 import DeleteExerciseDialog from './DeleteExerciseDialog.jsx'
 import { Button, ButtonLink } from './Button.jsx'
 
-export default function ExerciseForm({ exercise }) {
+export default function ExerciseForm({ exercise, cancelPath = '/exercises', onCreated, onSavingChange }) {
   const { t, exerciseName } = useLanguage()
   const { data, saveExercise, deleteExercise } = useStorage()
   const navigate = useNavigate()
@@ -21,10 +21,16 @@ export default function ExerciseForm({ exercise }) {
   const [imageError, setImageError] = useState('')
   const [deleteOpen, setDeleteOpen] = useState(false)
   const submitLock = useRef(false)
+  const active = useRef(true)
   const nameRef = useRef(null)
   const muscleRef = useRef(null)
   const imageRef = useRef(null)
   const editing = Boolean(exercise)
+
+  useEffect(() => {
+    active.current = true
+    return () => { active.current = false }
+  }, [])
 
   function update(field, value) {
     if (field === 'image') setImageError('')
@@ -47,16 +53,20 @@ export default function ExerciseForm({ exercise }) {
     }
     submitLock.current = true
     setSaving(true)
+    onSavingChange?.(true)
     setSaveError('')
     try {
-      await saveExercise(exercise?.id, draft)
-      navigate('/exercises', { state: { message: editing ? 'Exercise updated.' : 'Exercise created.' } })
+      const saved = await saveExercise(exercise?.id, draft)
+      if (!active.current) return
+      if (!editing && onCreated) onCreated(saved.exercises.at(-1))
+      else navigate('/exercises', { state: { message: editing ? 'Exercise updated.' : 'Exercise created.' } })
     } catch (failure) {
       if (failure.errors) setErrors(failure.errors)
       else setSaveError(failure.message)
     } finally {
       submitLock.current = false
       setSaving(false)
+      if (active.current) onSavingChange?.(false)
     }
   }
 
@@ -83,7 +93,7 @@ export default function ExerciseForm({ exercise }) {
         <div className="exercise-form__actions">
           <Button type="submit" disabled={saving || imageBusy}>{saving ? t("Saving…") : editing ? t("Save changes") : t("Create exercise")}</Button>
           {editing && <Button variant="danger" disabled={saving || imageBusy} onClick={() => setDeleteOpen(true)}>{t("Delete exercise")}</Button>}
-          <ButtonLink variant="text" to="/exercises">{t("Cancel")}</ButtonLink>
+          <ButtonLink variant="text" to={cancelPath} replace={Boolean(onCreated)} onClick={(event) => { if (saving) event.preventDefault() }} aria-disabled={saving || undefined}>{t("Cancel")}</ButtonLink>
         </div>
       </form>
       {exercise && <DeleteExerciseDialog exercise={exercise} assignmentCount={countExerciseAssignments(data.routines, exercise.id)} open={deleteOpen} onClose={() => setDeleteOpen(false)} onDelete={remove} />}

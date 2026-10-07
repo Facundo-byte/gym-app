@@ -8,6 +8,7 @@ Milestones 1–11 implement the authorized scope. [The final acceptance report](
 
 - Exercise library with search, create/edit/delete, processed PNG/JPEG uploads, image replacement/removal and intentional image fallbacks.
 - Routines with one or more weekdays, independent ordered exercise lists, and separate sets/reps/target weight per occurrence. Repeated exercises are allowed.
+- Create a library exercise directly from a routine's Add exercise picker. Cancel returns with the previous selection/search/targets intact; saving returns with the new exercise selected, ready to confirm its targets.
 - Today's configured workouts with one finish per routine/local date, immutable saved names/targets and refreshed completion history.
 - Monday–Sunday states, partial daily counts, completed/planned totals and calculated consistency.
 - Validated versioned storage, disclosed recovery, exact original-data downloads, confirmed destructive actions, preserved drafts after failures and stale-update notices.
@@ -50,7 +51,7 @@ npm run test:e2e
 npm run test:auth
 ```
 
-Chromium installation is required once per locked Playwright browser revision. `test:e2e` builds normal production output and runs 22 isolated executions at 390/768/1024/1440 px on port **4175**. `test:auth` builds separately to `.auth-test-dist/` and runs eight desktop/mobile account executions with intercepted fixture HTTP on port **4176**. Both include Spanish acceptance scenarios. Keep those ports free. Tests do not use real account credentials or the user's browser profile; their servers are never reused.
+Chromium installation is required once per locked Playwright browser revision. `test:e2e` builds normal production output and runs 28 isolated executions at 390/768/1024/1440 px on port **4175**. `test:auth` builds separately to `.auth-test-dist/` and runs ten desktop/mobile account executions with intercepted fixture HTTP on port **4176**. Both include Spanish acceptance scenarios. Keep those ports free. Tests do not use real account credentials or the user's browser profile; their servers are never reused.
 
 `npm test` uses Node's native runner, including the actual migration in PostgreSQL/PGlite. Coverage measures domain/services, excluding React, SQL, SDK internals and browser execution. Playwright and PGlite are development dependencies; Supabase is the optional account runtime. Reports/screenshots are ignored by Git:
 

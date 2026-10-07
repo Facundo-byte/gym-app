@@ -5,6 +5,7 @@
 .assignment-form { display: grid; gap: var(--space-5); margin-top: var(--space-7); }
 .exercise-picker { display: grid; gap: var(--space-4); min-width: 0; margin: 0; padding: 0; border: 0; }
 .exercise-picker legend { margin-bottom: var(--space-4); color: var(--color-muted); font-size: 12px; font-weight: 700; }
+.exercise-picker__create { justify-self: start; }
 .exercise-picker__results { max-height: 300px; overflow-y: auto; display: grid; gap: var(--space-3); padding: 4px; border-radius: var(--radius-control); scrollbar-color: var(--color-border) var(--color-background); }
 .exercise-choice { display: flex; align-items: center; gap: var(--space-3); min-width: 0; padding: var(--space-3); border: 1px solid transparent; border-radius: var(--radius-control); background: var(--color-surface); cursor: pointer; }
 .exercise-choice > input { width: 18px; height: 18px; flex-shrink: 0; margin: 0; accent-color: var(--color-accent); }

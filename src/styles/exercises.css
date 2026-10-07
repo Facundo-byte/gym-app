@@ -13,6 +13,7 @@
 .exercise-card p { margin-top: 8px; color: var(--color-accent); font-size: 12px; line-height: 17px; font-weight: 700; }
 .exercise-status { margin-block: 16px; font-size: 13px; color: var(--color-muted); }
 .exercise-editor { max-width: 560px; margin-inline: auto; }
+.exercise-editor__return { display: flex; justify-content: flex-end; margin-bottom: var(--space-6); }
 .exercise-form { display: grid; gap: 16px; margin-top: 32px; }
 .exercise-form .field__input { font-size: 13px; }
 .exercise-form select.field__input { height: 48px; }

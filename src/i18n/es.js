@@ -176,6 +176,7 @@ export const spanish = {
   "Saving…": "Guardando…",
   "Save changes": "Guardar cambios",
   "Create exercise": "Crear ejercicio",
+  "Back to Add exercise": "Volver a Agregar ejercicio",
   "Delete exercise": "Eliminar ejercicio",
   Cancel: "Cancelar",
   "Delete exercise?": "¿Eliminar ejercicio?",

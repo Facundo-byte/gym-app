@@ -47,6 +47,7 @@ There are 124 native tests: the original 105 local tests, 13 account/service tes
 | Image validation, source/encoded limits, conversion failure, URL cleanup | `exerciseImages.test.js`, `exercises.test.js` | Upload synthetic PNG, decode preview, persist through navigation/refresh |
 | Routine names/days, independent lists, retained IDs, confirmed day removal | `routines.test.js` | Create two training days, switch, refresh, Back/Forward, delete |
 | Repeated assignments, positive integer sets/reps, zero/decimal weight, complete reorder permutations | `assignments.test.js` | Invalid fractional sets, independent targets, keyboard move, refresh order, cancel/confirm removal |
+| Create a library exercise inside a routine and return to the correct draft | Existing exercise/assignment service tests | English/Spanish create/photo/selection, cancel and browser Back without writes, preserved targets, empty library, failed saves, guarded pending save and account isolation |
 | Cascades, dangling targets, snapshots independent of deleted sources | `assignments.test.js`, `routines.test.js`, `dataIntegrity.test.js`, `workouts.test.js` | Rename live exercise, delete referenced exercise/routine, retain original completed labels/targets |
 | Unique/idempotent completion, concurrent requests, failed finish preserving state | `workouts.test.js` | Finish, disabled completed action, focus, refresh, preserved completion |
 | Frozen schedules, reconciliation, multiple workouts per day, valid denominator, 3/4 = 75%, zero-session weeks | `weeklyProgress.test.js`, `workouts.test.js` | Seven indicators, 0/0, 0/2, 1/2 = 50%, preserved history and reconciled 1/1 = 100% |
@@ -58,17 +59,18 @@ There are 124 native tests: the original 105 local tests, 13 account/service tes
 
 ## Browser scenarios and viewports
 
-Ten scenarios produce 22 executions:
+Thirteen scenarios produce 28 executions:
 
 | Project | CSS viewport | Scenarios |
 | --- | --- | --- |
-| `desktop` | 1440 × 900 | Complete journey, three storage cases, four date cases, two language cases |
-| `mobile` | 390 × 844, touch/mobile emulation | Complete journey, three storage cases, four date cases, two language cases |
+| `desktop` | 1440 × 900 | Complete journey, four storage cases, four date cases, two language cases, two nested exercise-creation cases |
+| `mobile` | 390 × 844, touch/mobile emulation | Complete journey, four storage cases, four date cases, two language cases, two nested exercise-creation cases |
 | `tablet` | 768 × 900 | Complete journey |
 | `compact-desktop` | 1024 × 900 | Complete journey |
 
 - `e2e/journey.spec.js`: exercise → image → routine → days → assignments/targets/order → Home → finish → progress → refresh; then live rename, confirmed cascades, and readable saved history. Controls are activated by keyboard with focus checks. Layout checks reject page-wide overflow.
-- `e2e/storage.spec.js`: bundled starter images decoding/fitting without rewriting legacy bytes, retained/default-restored personal uploads, invalid replacements, renamed starters and missing-file fallbacks; original-data recovery/download, keyboard dialog containment and cancel, failed writes and retries, retained drafts after approved repair, and updates shared by two tabs. This is the only browser spec that directly reads/injects the application's storage key, as a focused adapter test.
+- `e2e/storage.spec.js`: bundled starter images decoding/fitting without rewriting legacy bytes, retained/default-restored personal uploads, invalid replacements, renamed starters and missing-file fallbacks; original-data recovery/download, keyboard dialog containment and cancel, failed writes and retries, retained drafts after approved repair, and updates shared by two tabs. Also verifies creation from an empty routine picker, quota failure retaining input without redirection, cancellation, later successful creation/assignment and invalid nested routine/day routes. This is the only browser spec that directly reads/injects the application's storage key, as a focused adapter test.
+- `e2e/exercise-creation.spec.js`: the same nested routine workflow in English and Spanish, including keyboard actions, uploaded images, upper return/Cancel/browser Back without writes, retained search/selection/targets, validation, new-exercise selection/focus, unchanged other weekdays and refresh persistence. Storage assertions use disposable context snapshots. Screenshots capture the picker, creator and selected result.
 - `e2e/language.spec.js`: bilingual search, keyboard language switching, draft/error retention, exact guest-byte preservation, refresh preference, canonical starter/muscle values, Spanish routine/assignment/completion and a blocked preference write. Storage inspection uses disposable context snapshots; the failure fixture targets only the separate language key.
 - `e2e/dates.spec.js`: Argentina Sunday January 3 → Monday January 4, 2027; Auckland local Monday while UTC is Sunday; leap-day February 29 → March 1, 2028; and New York midnight following the 23-hour DST day on March 8, 2026. All cases also reject finishing a stale dated card, refresh after visibility changes, and verify persisted counts.
 
@@ -76,12 +78,13 @@ The tests install/control a browser clock before loading the application and ass
 
 ## Account scenarios and live verification
 
-`npm run test:auth` builds into ignored `.auth-test-dist/` with a synthetic public configuration, then starts a private preview on port 4176. It does not replace the normal `dist/` or contact a real Supabase project. Its eight executions cover 1440 × 900 desktop and 390 × 844 mobile:
+`npm run test:auth` builds into ignored `.auth-test-dist/` with a synthetic public configuration, then starts a private preview on port 4176. It does not replace the normal `dist/` or contact a real Supabase project. Its ten executions cover 1440 × 900 desktop and 390 × 844 mobile:
 
 - Login validation/failed credentials with retained inputs, signup confirmation, recovery request/redirect, protected password route, and guest continuation.
 - Spanish login/provider errors, signup/recovery feedback, password validation, import summary and language persistence through sign-in/logout.
 - Explicit import/cancel/focus restoration, idempotent retry, preserved guest plans, private image decoding, completion/history on a second independent session, stale/failed saves with retained drafts, logout failure semantics, and a different account's separate data.
 - Real SDK PKCE callback exchange against fixture HTTP, authenticated password update, and guest continuation clearing account state.
+- Nested exercise creation through the same account service, failed-save draft retention, a deliberately held write that blocks return/cancel, successful selection/assignment, private-image reload and exclusion from another account.
 
 View screenshots with `npx playwright show-report playwright-auth-report`. Fixture responses exercise actual UI/SDK behavior but do not prove Supabase's deployed RLS or email delivery. `supabase/tests/account-sync.test.js` independently executes the unmodified migration and checks anonymous denial, two owners, revoked direct writes, revision conflicts, import retries, duplicate completion rejection, and immutable private-image policies.
 
@@ -102,6 +105,7 @@ Use a new disposable browser profile with `npm run build` and `npm run preview`.
 1. Start on Home. Check Rest day, all seven indicators, and the zero-session message. Visit Exercises/Routines/Login and an unknown address; check their empty/account/recovery states and Back/Forward.
 2. Create an exercise with a PNG/JPEG image. Submit missing fields first, then valid trimmed text. Search with mixed case/spaces, try a query with no results, and clear it. Refresh and reopen the exercise; verify its name and decoded image.
 3. Create a routine with today's weekday and another weekday. Configure different sets/reps/weights on each day, including zero and a decimal weight. Submit fractional sets or negative weight first; check associated errors and retained drafts.
+   In Add exercise, enter targets/search/selection, choose Create exercise and fill name/muscle/photo. Use the upper return button, then Cancel and browser Back on separate visits; the assignment draft stays intact and no exercise is saved. Create successfully; the new item is selected, the search is cleared and targets remain. Confirm Add to training day, refresh and check the other day is unchanged. Repeat in Spanish and with an empty library.
 4. Add a repeated exercise and another exercise. Reorder using the keyboard; check boundary buttons/focus and saved order after refresh. Switch days, refresh, and use Back/Forward; verify the other day's targets are unchanged.
 5. Cancel/Escape an assignment removal, then confirm it. Open Home and finish today's configured workout using the keyboard. Verify the completed message, disabled action, increased completed count, and percentage based on planned occurrences. Refresh; completion must remain unique.
 6. Rename a live exercise, then cancel and confirm deleting it. Confirm deletion explains its usage and removes live assignments. Delete the source routine; today's saved completion must retain its original names/targets and remain readable after refresh.
@@ -116,6 +120,8 @@ The checked-in browser suite currently uses Chromium only; mobile is emulated, n
 Figma Starter-plan tool access remained blocked through Milestone 11. Visual review uses the existing documented reference, tokens, and rendered application; no fresh pixel comparison with unavailable frames is claimed. Local storage remains device/browser specific and cannot guarantee a transaction between simultaneously writing tabs. Download exports do not provide a restore/import UI. Account authentication/synchronization are available when configured; live project checks and email delivery must be recorded separately from intercepted browser tests. See SUPABASE.md for setup and limits.
 
 ## Final verification record
+
+The October 7, 2026 authorized create-from-routine follow-up passed lint, all 124 native tests, the production build, all 28 production browser executions and all ten account fixture executions. The new English/Spanish picker/creator/selected-result screenshots were reviewed at 390 and 1440 px. An additional disposable Spanish flow at 280/768/1024 px verified visible return controls, cancellation with retained targets, new-exercise selection and no horizontal overflow or uncaught errors; screenshots are under ignored `test-results/flow-review/`. The private review server and contexts were closed. Existing Figma references and application tokens guided this addition; fresh Figma access remains unavailable under the documented Starter-plan limit. No live user plans or real Supabase accounts were changed by these checks.
 
 The subsequent authorized starter-illustration task expands the repeatable production suite to 18 executions, alongside the six account executions. [EXERCISE_IMAGES.md](EXERCISE_IMAGES.md) records its checks and replacement instructions. The Milestone 11 results below describe that earlier verification run.
 
