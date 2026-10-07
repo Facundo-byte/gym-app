@@ -1,0 +1,39 @@
+@font-face {
+  font-family: Manrope; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('../assets/fonts/manrope-regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: Manrope; font-style: normal; font-weight: 500; font-display: swap;
+  src: url('../assets/fonts/manrope-medium.ttf') format('truetype');
+}
+@font-face {
+  font-family: Manrope; font-style: normal; font-weight: 700; font-display: swap;
+  src: url('../assets/fonts/manrope-bold.ttf') format('truetype');
+}
+:root {
+  --font-family: Manrope, system-ui, sans-serif;
+  --color-background: #090c0b;
+  --color-surface: #111513;
+  --color-surface-raised: #171d1a;
+  --color-accent: #63e894;
+  --color-accent-surface: #29613d;
+  --color-text: #f0f5f2;
+  --color-muted: #94a199;
+  --color-border: #303b34;
+  --color-warning: #fab847;
+  --color-danger: #ff9999;
+  --color-overlay: rgb(3 4 3 / 72%);
+  --radius-control: 12px;
+  --radius-row: 14px;
+  --radius-card: 20px;
+  --radius-dialog: 22px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 44px;
+  --space-9: 56px;
+}

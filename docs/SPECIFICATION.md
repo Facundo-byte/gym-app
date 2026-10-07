@@ -335,6 +335,10 @@ For local mutations: validate input, calculate the entire next document, seriali
 - Do not overwrite an unknown future schema version. Add explicit migrations when a later milestone actually changes the schema.
 - Cross-tab collaboration is outside the local MVP. At minimum, detect another tab's application-key update and prompt for reload before saving a stale document. Do not claim this is a full multi-tab conflict-resolution system.
 
+Milestone 8 implements this policy with `inspectAppData()`, `applyRecovery({ confirmed: true })`, `exportSavedData()`, and storage-change subscriptions through the service boundary. Inspection of a supported envelope produces a validated preview and disclosed counts for invalid live records, dependent assignments, invalid optional images, and duplicate completion pairs. No write occurs before confirmation. Valid missing-reference assignments retain IDs/targets and receive routine-day review links; Home's calculated recovery view is labeled as a preview and cannot be finished. A failed recovery write keeps both the original raw document and the pending proposal for retry. Form drafts survive inspection-related save failures and successful recovery.
+
+Duplicate live identities or weekdays, invalid historical context, duplicate log IDs, invalid envelopes, and unsupported versions do not receive automatic repair. Exact stored text can be downloaded for manual recovery; unsupported versions are not offered a destructive reset. A user-confirmed reset of corrupt/invalid/ambiguous data checks the reviewed raw baseline first and removes only the application key. Another tab's detected update also blocks cached/no-op operations and supplies a reload path that explicitly explains draft loss. These protections do not make localStorage a multi-tab transaction system. Failed image processing keeps the previous preview, with an explicit keep-image/continue-without-image choice before submitting; invalid canvas output is rejected rather than stored.
+
 ### Local image limits
 
 The mobile form reference advertises PNG/JPG input up to 5 MB. Preserve that source-file limit while acknowledging that uncompressed Base64 images would quickly exhaust local storage.
@@ -356,6 +360,7 @@ Accessibility, responsiveness, basic validation, and appropriate states apply to
 - Pair progress colors with symbols/text and accessible day labels. Ensure readable contrast; document any necessary adjustment to an inaccessible reference color.
 - Provide comfortably sized touch controls, approximately 44 × 44 px for primary touch targets, with sufficient spacing.
 - Support long routine/exercise names, large text, 200% zoom, and a mobile keyboard without hiding essential actions.
+- Use at least 16 px text for text, search, numeric, and select inputs in narrow layouts. This Milestone 7 readability refinement takes precedence over smaller editable text in the mockup; retain the surrounding typography and natural scrolling.
 - Include useful loading where an operation is asynchronous, empty-library/routine states, search-no-results states, storage errors, success feedback, and destructive confirmations.
 - Do not add artificial loading delays or loading UI to an operation that completes immediately.
 
@@ -595,6 +600,8 @@ Milestone 10 may be skipped. Milestone 11 must be able to finish a complete loca
 4. The manual flow succeeds: create exercise → create routine → select days → add/configure/reorder exercises → Home → finish → verify weekly progress → refresh.
 5. Test suite, lint, and production build pass, and a production preview loads and supports the local flows.
 6. Remaining known limitations are recorded. The local application is functional and verified before optional cloud work is considered.
+
+**Repository verification setup (Milestone 9):** The existing Node runner remains responsible for focused domain/service tests. A development-only Playwright suite verifies the production app in isolated contexts at 390, 768, 1024, and 1440 px, including keyboard interactions, persistence, actual browser storage events, and controlled-clock date updates. `npm run test:coverage` reports native domain/service coverage; `npm run test:e2e` builds and starts its own preview on port 4175. See [TESTING.md](TESTING.md) for the coverage map and setup, and [MILESTONE_9_ACCEPTANCE.md](MILESTONE_9_ACCEPTANCE.md) for results and limitations. Authentication remains outside this milestone.
 
 ### Milestone 10 — Optional authentication and synchronization
 

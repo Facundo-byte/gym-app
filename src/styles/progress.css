@@ -1,0 +1,31 @@
+.weekly-progress { display: flex; flex-direction: column; gap: var(--space-4); min-height: 455px; }
+.weekly-progress h2 { font-size: 18px; line-height: 25px; }
+.weekly-progress__dates { color: var(--color-muted); font-size: 12px; line-height: 1.6; }
+.weekly-progress__number { font-size: 42px; line-height: 57px; font-weight: 700; color: var(--color-accent); }
+.weekly-progress__consistency { margin-top: var(--space-2); color: var(--color-accent); font-size: 14px; font-weight: 700; }
+.weekday-strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-1); list-style: none; padding: 0; margin: var(--space-2) 0; }
+.weekday-strip li { min-width: 0; display: grid; gap: var(--space-2); justify-items: center; padding: var(--space-3) 0; border-radius: var(--radius-control); }
+.weekday-strip li[aria-current='date'] { background: var(--color-surface-raised); box-shadow: inset 0 0 0 1px var(--color-border); }
+.weekday-strip__name { color: var(--color-muted); font-size: 11px; font-weight: 700; }
+.weekday-strip li[aria-current='date'] .weekday-strip__name { color: var(--color-accent); }
+.weekday-strip__name--short { display: none; }
+.weekday-strip__symbol { color: var(--color-muted); font-size: 22px; line-height: 1; }
+.weekday-strip__count { min-width: 0; max-width: 100%; color: var(--color-muted); font-size: 10px; line-height: 1.4; overflow-wrap: anywhere; }
+.weekday-strip [data-state='completed'] .weekday-strip__symbol, .weekly-progress__legend [data-state='completed'], .weekday-strip [data-state='pending'] .weekday-strip__symbol, .weekly-progress__legend [data-state='pending'] { color: var(--color-accent); }
+.weekday-strip [data-state='missed'] .weekday-strip__symbol, .weekly-progress__legend [data-state='missed'] { color: var(--color-danger); }
+.weekly-progress__legend { display: flex; flex-wrap: wrap; column-gap: var(--space-4); row-gap: var(--space-2); list-style: none; margin: 0; padding: 0; color: var(--color-muted); font-size: 11px; }
+.weekly-progress__legend li { display: flex; gap: var(--space-2); align-items: center; }
+.weekly-progress__legend span { font-size: 16px; line-height: 1; }
+.weekly-progress__note { margin-top: auto; }
+@media (max-width: 767px) {
+  .weekly-progress { min-height: 0; gap: var(--space-3); }
+  .weekly-progress h2 { font-size: 16px; }
+  .weekly-progress__number { font-size: 32px; line-height: 42px; }
+  .weekly-progress__summary { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--space-4); align-items: center; }
+  .weekly-progress__summary .card__description { font-size: 12px; }
+  .weekly-progress__consistency { grid-column: 1 / -1; margin-top: var(--space-1); font-size: 13px; }
+  .weekday-strip { margin: 0; }
+  .weekday-strip__name--full { display: none; }
+  .weekday-strip__name--short { display: inline; }
+  .weekly-progress__note { font-size: 12px; }
+}

@@ -1,0 +1,45 @@
+.routine-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6); }
+.routine-card { display: flex; flex-direction: column; gap: var(--space-4); }
+.routine-card h2 { font-size: 22px; line-height: 30px; }
+.routine-card__days { color: var(--color-accent); font-size: 13px; line-height: 1.8; }
+.routine-card__count { color: var(--color-muted); font-size: 13px; }
+.routine-card .button { align-self: flex-start; margin-top: auto; }
+.routine-status { margin-block: var(--space-4); color: var(--color-muted); font-size: 13px; }
+.routine-editor { max-width: 560px; margin-inline: auto; }
+.routine-form { display: grid; gap: var(--space-6); margin-top: var(--space-7); }
+.routine-form__actions { display: grid; gap: var(--space-3); margin-top: var(--space-4); }
+.routine-form__actions > .button--primary { justify-content: flex-start; }
+.weekday-picker { min-width: 0; display: grid; gap: var(--space-3); margin: 0; padding: 0; border: 0; }
+.weekday-picker legend { margin-bottom: var(--space-3); color: var(--color-muted); font-size: 12px; font-weight: 700; }
+.weekday-picker__options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+.weekday-option { position: relative; min-height: 48px; display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border: 1px solid transparent; border-radius: var(--radius-control); background: var(--color-surface-raised); font-size: 13px; cursor: pointer; }
+.weekday-option input { width: 18px; height: 18px; margin: 0; accent-color: var(--color-accent); flex-shrink: 0; }
+.weekday-option:has(:checked) { border-color: var(--color-accent); background: var(--color-accent-surface); }
+.weekday-option:has(:focus-visible) { outline: 2px solid var(--color-accent); outline-offset: 4px; }
+.weekday-option:has(:disabled) { cursor: not-allowed; opacity: 0.6; }
+.routine-detail { display: grid; gap: var(--space-6); }
+.routine-day-selector { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.routine-day-selector .button[aria-pressed='true'] { background: var(--color-accent); color: var(--color-background); }
+.routine-day-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+.routine-day-heading h2 { font-size: 22px; line-height: 30px; }
+.routine-day-heading p { color: var(--color-muted); font-size: 13px; }
+.routine-reference-notice { color: var(--color-warning); font-size: 13px; line-height: 1.7; margin-top: var(--space-4); }
+.routine-detail__actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-4); }
+.routine-detail__mobile-edit { display: none; }
+@media (max-width: 1023px) {
+  .routine-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767px) {
+  .routine-grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+  .routine-card h2 { font-size: 20px; line-height: 28px; }
+  .routine-card .button { width: 100%; justify-content: space-between; }
+  .routine-editor { margin-top: -4px; }
+  .routine-editor .page-header__description { font-size: 13px; }
+  .routine-form { margin-top: 28px; }
+  .routine-detail__actions { display: grid; gap: var(--space-3); }
+  .routine-detail__mobile-edit { display: flex; }
+  .routine-day-heading h2 { font-size: 20px; }
+}
+@media (max-width: 339px) {
+  .weekday-picker__options { grid-template-columns: minmax(0, 1fr); }
+}

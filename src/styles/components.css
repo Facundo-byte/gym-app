@@ -1,0 +1,58 @@
+.button {
+  min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--space-2); padding: 12px 18px; border: 1px solid transparent;
+  border-radius: var(--radius-control); font-size: 14px; font-weight: 700; line-height: 18px;
+  text-decoration: none; transition: background-color 120ms ease;
+}
+.button--primary { background: var(--color-accent); color: var(--color-background); }
+.button--primary:hover { background: #83efa9; }
+.button--secondary { background: var(--color-surface-raised); color: var(--color-text); }
+.button--secondary:hover { background: var(--color-border); }
+.button--danger { background: var(--color-danger); color: var(--color-background); }
+.button--danger:hover { background: #ffb8b8; }
+.button:disabled { color: var(--color-muted); background: var(--color-surface-raised); }
+.button--text { background: none; color: var(--color-muted); padding: 8px 0; }
+.button--text:hover { color: var(--color-text); }
+.card { min-width: 0; padding: var(--space-6); background: var(--color-surface); border-radius: var(--radius-card); }
+.card__title { font-size: 22px; font-weight: 700; line-height: 30px; }
+.card__description { color: var(--color-muted); font-size: 13px; line-height: 1.7; }
+.empty-state { display: grid; justify-items: start; gap: var(--space-3); padding-block: var(--space-7); }
+.empty-state__title { font-size: 18px; line-height: 1.5; }
+.empty-state p { max-width: 48ch; color: var(--color-muted); font-size: 14px; line-height: 1.7; }
+.empty-state__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-3); }
+.field { display: grid; gap: var(--space-2); min-width: 0; }
+.field__label { color: var(--color-muted); font-size: 12px; font-weight: 700; }
+.field__input {
+  width: 100%; min-width: 0; min-height: 48px; padding: 14px 16px;
+  color: var(--color-text); background: var(--color-surface-raised);
+  border: 1px solid transparent; border-radius: var(--radius-control); font-size: 14px;
+}
+.field__input::placeholder { color: var(--color-muted); }
+.field__input:disabled { cursor: not-allowed; }
+.field__input[aria-invalid='true'] { border-color: var(--color-danger); }
+.field__hint, .field__error { font-size: 12px; line-height: 1.6; }
+.field__hint { color: var(--color-muted); }
+.field__error { color: var(--color-danger); }
+.dialog {
+  width: min(520px, calc(100% - 40px)); max-height: calc(100dvh - 40px); padding: 28px;
+  color: var(--color-text); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-dialog);
+}
+.dialog::backdrop { background: var(--color-overlay); }
+.dialog__title { font-size: 24px; line-height: 1.4; margin-bottom: var(--space-4); }
+.dialog__body { display: grid; gap: var(--space-4); color: var(--color-muted); font-size: 14px; line-height: 1.8; }
+.dialog__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-3); margin-top: var(--space-7); }
+.storage-notice { margin-bottom: var(--space-7); border: 1px solid var(--color-warning); }
+.storage-notice h2 { font-size: 18px; line-height: 1.5; margin-bottom: var(--space-2); }
+.storage-notice p { color: var(--color-muted); font-size: 14px; line-height: 1.7; }
+.storage-notice__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-4); }
+.storage-notice__failure { color: var(--color-danger) !important; }
+.storage-notice__details { padding-left: var(--space-5); color: var(--color-muted); font-size: 14px; line-height: 1.7; overflow-wrap: anywhere; }
+.storage-notice__details li + li { margin-top: var(--space-2); }
+.storage-notice__details a { display: inline-block; min-width: 44px; min-height: 44px; max-width: 100%; padding: 9px 0; vertical-align: middle; color: var(--color-accent); }
+@media (max-width: 767px) {
+  .card { padding: 18px; border-radius: 18px; }
+  .card__title { font-size: 18px; line-height: 26px; }
+  .dialog { padding: var(--space-6); }
+  .dialog__actions .button { flex: 1; }
+  .field__input { font-size: 16px; }
+}
