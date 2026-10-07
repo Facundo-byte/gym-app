@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { test, expect, activate, expectNoOverflow } from './helpers.js'
 import { createEmptyDocument, STORAGE_KEY } from '../src/services/storage.js'
+import { createStarterDocument } from '../src/services/starterExercises.js'
 
 // These adapter-focused browser fixtures run only in Playwright's disposable storage contexts.
 async function raw(page) {
@@ -19,6 +20,77 @@ async function failWrites(page, fail) {
     window.fixtureWriteFailure = fail
   }, { key: STORAGE_KEY, fail })
 }
+
+test('bundled starter images preserve legacy storage and personal uploads can return to defaults', async ({ page }, testInfo) => {
+  await page.clock.setFixedTime(new Date('2026-10-07T15:00:00Z'))
+  await page.goto('/exercises')
+  await expect(page.getByRole('link', { name: 'Edit Bench Press', exact: true })).toBeVisible()
+  // Simulate an already-saved pre-illustration library; rendering must not migrate its bytes.
+  const original = JSON.stringify(createStarterDocument('2026-10-01T15:00:00.000Z'))
+  await page.evaluate(({ key, original }) => localStorage.setItem(key, original), { key: STORAGE_KEY, original })
+  await page.reload()
+  const cards = page.locator('.exercise-card')
+  await expect(cards).toHaveCount(9)
+  for (const card of await cards.all()) {
+    await card.scrollIntoViewIfNeeded()
+    await expect(card.locator('img')).toHaveAttribute('src', /^\/images\/exercises\/.+\.webp$/)
+    await expect.poll(() => card.locator('img').evaluate((image) => image.complete && image.naturalWidth > 0)).toBe(true)
+    expect(await card.locator('img').evaluate((image) => {
+      const frame = image.parentElement.getBoundingClientRect()
+      const rendered = image.getBoundingClientRect()
+      return getComputedStyle(image).objectFit === 'contain' && rendered.height <= frame.height + 1 && rendered.width <= frame.width + 1
+    }), 'The complete illustration fits inside its card without clipping').toBe(true)
+  }
+  expect(await raw(page)).toBe(original)
+  await page.evaluate(() => window.scrollTo(0, 0))
+  const shot = testInfo.outputPath('starter-library.png')
+  await page.screenshot({ path: shot, fullPage: true })
+  await testInfo.attach('starter-library', { path: shot, contentType: 'image/png' })
+  await expectNoOverflow(page)
+
+  await activate(page, page.getByRole('link', { name: 'Edit Bench Press', exact: true }))
+  const preview = page.getByAltText('Exercise preview')
+  await expect(preview).toHaveAttribute('src', '/images/exercises/bench-press.webp')
+  await page.locator('input[type=file]').setInputFiles({ name: 'bad.png', mimeType: 'image/png', buffer: Buffer.from('invalid image') })
+  await expect(page.getByRole('button', { name: 'Keep current image', exact: true })).toBeVisible()
+  await activate(page, page.getByRole('button', { name: 'Keep current image', exact: true }))
+  await expect(preview).toHaveAttribute('src', '/images/exercises/bench-press.webp')
+  expect(await raw(page)).toBe(original)
+  const png = await page.evaluate(() => {
+    const canvas = document.createElement('canvas')
+    canvas.width = 4; canvas.height = 4
+    canvas.getContext('2d').fillRect(0, 0, 4, 4)
+    return canvas.toDataURL('image/png').split(',')[1]
+  })
+  await page.locator('input[type=file]').setInputFiles({ name: 'personal.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64') })
+  await expect(preview).toHaveAttribute('src', /^data:image\/png;base64,/)
+  await activate(page, page.getByRole('button', { name: 'Save changes', exact: true }))
+  await page.reload()
+  const bench = page.getByRole('link', { name: 'Edit Bench Press', exact: true })
+  await expect(bench.locator('img')).toHaveAttribute('src', /^data:image\/png;base64,/)
+  const saved = JSON.parse(await raw(page))
+  expect(saved.exercises.filter((exercise) => exercise.id !== 'exercise-bench-press').every((exercise) => exercise.image === null)).toBe(true)
+
+  await activate(page, bench)
+  await activate(page, page.getByRole('button', { name: 'Use default image', exact: true }))
+  await expect(preview).toHaveAttribute('src', '/images/exercises/bench-press.webp')
+  await activate(page, page.getByRole('button', { name: 'Save changes', exact: true }))
+  await page.reload()
+  await expect(bench.locator('img')).toHaveAttribute('src', '/images/exercises/bench-press.webp')
+  expect(JSON.parse(await raw(page)).exercises.every((exercise) => exercise.image === null)).toBe(true)
+  await activate(page, bench)
+  await page.getByLabel('Exercise name', { exact: true }).fill('Different movement')
+  await expect(preview).toHaveCount(0)
+  await activate(page, page.getByRole('button', { name: 'Save changes', exact: true }))
+  await expect(page.getByRole('link', { name: 'Edit Different movement', exact: true }).locator('img')).toHaveCount(0)
+
+  await page.route('**/images/exercises/squat.webp', (route) => route.fulfill({ status: 404 }))
+  await page.reload()
+  const squat = page.getByRole('link', { name: 'Edit Squat', exact: true })
+  await squat.scrollIntoViewIfNeeded()
+  await expect(squat.locator('.exercise-card__image > span')).toBeVisible()
+  await expectNoOverflow(page)
+})
 
 test('recovery preview, original download, cancel, failed repair and retained draft across approved recovery', async ({ page }) => {
   await page.clock.setFixedTime(new Date('2026-10-07T15:00:00Z'))

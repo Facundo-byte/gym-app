@@ -4,6 +4,7 @@ import { useStorage } from '../app/useStorage.js'
 import { MUSCLES, countExerciseAssignments, validateExerciseInput } from '../domain/exercises.js'
 import TextField from './TextField.jsx'
 import ExerciseImageField from './ExerciseImageField.jsx'
+import { getDefaultExerciseImage } from '../config/defaultExercises.js'
 import DeleteExerciseDialog from './DeleteExerciseDialog.jsx'
 import { Button, ButtonLink } from './Button.jsx'
 
@@ -75,7 +76,7 @@ export default function ExerciseForm({ exercise }) {
           </select>
           {errors.muscle && <p className="field__error" id="exercise-muscle-error">{errors.muscle}</p>}
         </div>
-        <ExerciseImageField image={draft.image} inputRef={imageRef} onChange={(image) => update('image', image)} error={imageError || errors.image} onError={(message) => { setImageError(message); setErrors((current) => ({ ...current, image: '' })) }} busy={imageBusy} setBusy={setImageBusy} disabled={saving} />
+        <ExerciseImageField image={draft.image} defaultImage={getDefaultExerciseImage({ ...exercise, ...draft })} inputRef={imageRef} onChange={(image) => update('image', image)} error={imageError || errors.image} onError={(message) => { setImageError(message); setErrors((current) => ({ ...current, image: '' })) }} busy={imageBusy} setBusy={setImageBusy} disabled={saving} />
         {saveError && <p className="field__error" role="alert">{saveError}</p>}
         <div className="exercise-form__actions">
           <Button type="submit" disabled={saving || imageBusy}>{saving ? 'Saving…' : editing ? 'Save changes' : 'Create exercise'}</Button>

@@ -9,6 +9,8 @@ This document defines the application to build and the acceptance criteria for e
 
 **Delivered status (October 7, 2026):** Milestones 1–11 were explicitly authorized and implemented, including the optional Supabase account milestone. Guest use remains complete without provider configuration. The owner confirmed actual confirmation/recovery emails working before requesting Milestone 11. [MILESTONE_11_ACCEPTANCE.md](MILESTONE_11_ACCEPTANCE.md) records final verification and remaining limits; earlier milestone reports retain their historical scope. New features or deployment require a separate request.
 
+**Authorized follow-up — starter illustrations:** The owner requested matching representative images for all nine default exercises, with easy code replacement. A central starter catalog resolves bundled illustrations for existing/new libraries while preserving uploaded personal images and stored documents. Renamed/nonstarter exercises retain neutral fallbacks; edited uploads can return to the default. IDs, schema, snapshots and Supabase ownership/import rules remain unchanged. [EXERCISE_IMAGES.md](EXERCISE_IMAGES.md) documents asset replacement and verification.
+
 ## 1. Product goal and scope
 
 Build a responsive application that lets a person organize gym exercises and recurring weekly routines, view today's planned workout, mark it finished, and review completion across the current week. The application must work on desktop and mobile and preserve data after refresh or browser restart.

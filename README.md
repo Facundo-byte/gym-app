@@ -14,7 +14,7 @@ Milestones 1–11 implement the authorized scope. [The final acceptance report](
 - Optional signup, login, confirmation/recovery emails, password change, logout, private images, confirmed guest import into an unused account and remote revision conflicts.
 - Responsive layouts, keyboard navigation, accessible labels/errors/dialogs, visible focus, readable weekday states and locally bundled Manrope.
 
-Nine starter exercises are saved once for a new guest installation or account. No demo routines or fake completions are created. Deleting every exercise keeps the library empty after refresh.
+Nine starter exercises are saved once for a new guest installation or account, with matching bundled illustrations available to existing libraries too. Uploaded personal images take priority. Replace their files or change the central catalog as described in [EXERCISE_IMAGES.md](docs/EXERCISE_IMAGES.md); defaults do not consume document storage or require a Supabase migration. No demo routines or fake completions are created. Deleting every exercise keeps the library empty after refresh.
 
 ## Install and run
 
@@ -49,7 +49,7 @@ npm run test:e2e
 npm run test:auth
 ```
 
-Chromium installation is required once per locked Playwright browser revision. `test:e2e` builds normal production output and runs 16 isolated executions at 390/768/1024/1440 px on port **4175**. `test:auth` builds separately to `.auth-test-dist/` and runs desktop/mobile account cases with intercepted fixture HTTP on port **4176**. Keep those ports free. Tests do not use real account credentials or the user's browser profile; their servers are never reused.
+Chromium installation is required once per locked Playwright browser revision. `test:e2e` builds normal production output and runs 18 isolated executions at 390/768/1024/1440 px on port **4175**. `test:auth` builds separately to `.auth-test-dist/` and runs desktop/mobile account cases with intercepted fixture HTTP on port **4176**. Keep those ports free. Tests do not use real account credentials or the user's browser profile; their servers are never reused.
 
 `npm test` uses Node's native runner, including the actual migration in PostgreSQL/PGlite. Coverage measures domain/services, excluding React, SQL, SDK internals and browser execution. Playwright and PGlite are development dependencies; Supabase is the optional account runtime. Reports/screenshots are ignored by Git:
 
@@ -69,12 +69,14 @@ src/
   app/          Routing, identity/data scopes, shared state and local-date updates
   assets/fonts/ Bundled Manrope fonts and their OFL license
   components/   Shared forms, controls, cards, dialogs, workout/progress UI
+  config/       Central starter-exercise names, muscles and bundled illustration paths
   domain/       Pure validation, dates, scheduling, snapshots and weekly calculations
   layouts/      Responsive navigation and application shell
   pages/        Lists, editors, day details, Home and account screens
   services/     Gym operations, local storage, authentication, remote data/images
   styles/       Visual tokens and responsive CSS
 docs/           Specification, setup, testing, architecture and acceptance reports
+public/images/  Bundled default exercise illustrations, served with the application
 e2e/            Disposable journeys, storage/date cases and account fixtures
 supabase/       Initial migration, PostgreSQL policy test and credential template
 scripts/        Opt-in live provider/API/browser checks

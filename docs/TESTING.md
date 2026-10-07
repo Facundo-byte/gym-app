@@ -35,7 +35,7 @@ To inspect the HTML report, screenshots, and any failure traces:
 npm run test:e2e:report
 ```
 
-The complete journey attaches configured-day and completed-workout screenshots at each width. Failures additionally retain screenshots and traces. Generated `test-results/` and `playwright-report/` directories are ignored by Git and lint. A new run replaces the previous report, so retain any evidence needed before rerunning. Tests have no automatic retries; investigate a failure rather than hiding it with a retry count.
+The complete journey attaches configured-day and completed-workout screenshots at each width. The starter-image storage scenario additionally attaches desktop/mobile library screenshots. Failures retain screenshots and traces. Generated `test-results/` and `playwright-report/` directories are ignored by Git and lint. A new run replaces the previous report, so retain any evidence needed before rerunning. Tests have no automatic retries; investigate a failure rather than hiding it with a retry count.
 
 ## Coverage and ownership
 
@@ -57,17 +57,17 @@ There are 119 native tests: the original 105 local tests, 13 account/service tes
 
 ## Browser scenarios and viewports
 
-Seven scenarios produce 16 executions:
+Eight scenarios produce 18 executions:
 
 | Project | CSS viewport | Scenarios |
 | --- | --- | --- |
-| `desktop` | 1440 × 900 | Complete journey, two storage cases, four date cases |
-| `mobile` | 390 × 844, touch/mobile emulation | Complete journey, two storage cases, four date cases |
+| `desktop` | 1440 × 900 | Complete journey, three storage cases, four date cases |
+| `mobile` | 390 × 844, touch/mobile emulation | Complete journey, three storage cases, four date cases |
 | `tablet` | 768 × 900 | Complete journey |
 | `compact-desktop` | 1024 × 900 | Complete journey |
 
 - `e2e/journey.spec.js`: exercise → image → routine → days → assignments/targets/order → Home → finish → progress → refresh; then live rename, confirmed cascades, and readable saved history. Controls are activated by keyboard with focus checks. Layout checks reject page-wide overflow.
-- `e2e/storage.spec.js`: original-data recovery/download, keyboard dialog containment and cancel, failed writes and retries, retained drafts after approved repair, and updates shared by two tabs. This is the only browser spec that directly reads/injects the application's storage key, as a focused adapter test.
+- `e2e/storage.spec.js`: bundled starter images decoding/fitting without rewriting legacy bytes, retained/default-restored personal uploads, invalid replacements, renamed starters and missing-file fallbacks; original-data recovery/download, keyboard dialog containment and cancel, failed writes and retries, retained drafts after approved repair, and updates shared by two tabs. This is the only browser spec that directly reads/injects the application's storage key, as a focused adapter test.
 - `e2e/dates.spec.js`: Argentina Sunday January 3 → Monday January 4, 2027; Auckland local Monday while UTC is Sunday; leap-day February 29 → March 1, 2028; and New York midnight following the 23-hour DST day on March 8, 2026. All cases also reject finishing a stale dated card, refresh after visibility changes, and verify persisted counts.
 
 The tests install/control a browser clock before loading the application and assert literal expected calendar dates. They advance the real scheduled midnight callback rather than substituting a production date control. See Playwright's official [clock guidance](https://playwright.dev/docs/clock).
@@ -113,6 +113,8 @@ The checked-in browser suite currently uses Chromium only; mobile is emulated, n
 Figma Starter-plan tool access remained blocked through Milestone 11. Visual review uses the existing documented reference, tokens, and rendered application; no fresh pixel comparison with unavailable frames is claimed. Local storage remains device/browser specific and cannot guarantee a transaction between simultaneously writing tabs. Download exports do not provide a restore/import UI. Account authentication/synchronization are available when configured; live project checks and email delivery must be recorded separately from intercepted browser tests. See SUPABASE.md for setup and limits.
 
 ## Final verification record
+
+The subsequent authorized starter-illustration task expands the repeatable production suite to 18 executions, alongside the six account executions. [EXERCISE_IMAGES.md](EXERCISE_IMAGES.md) records its checks and replacement instructions. The Milestone 11 results below describe that earlier verification run.
 
 On October 7, 2026, Milestone 11 passed lint, all 119 native tests, domain/service coverage, the 16 production browser executions and all six account fixture executions. Coverage was 99.64% lines, 95.28% branches and 96.07% functions. The normal production build and existing preview on port 4173 also passed.
 
