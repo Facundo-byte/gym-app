@@ -11,8 +11,15 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+.env.*
+!.env.example
 test-results/
 playwright-report/
+auth-test-results/
+playwright-auth-report/
+.auth-test-dist/
+.guest-test-dist/
 
 # Editor directories and files
 .vscode/*

@@ -6,6 +6,7 @@
 @import './styles/assignments.css';
 @import './styles/workouts.css';
 @import './styles/progress.css';
+@import './styles/accounts.css';
 
 * { box-sizing: border-box; }
 :root {

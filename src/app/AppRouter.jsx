@@ -25,6 +25,9 @@ export default function AppRouter() {
         <Route path="exercises/new" element={<ExerciseEditorPage />} />
         <Route path="exercises/:id/edit" element={<ExerciseEditorPage />} />
         <Route path="login" element={<LoginPage />} />
+        <Route path="signup" element={<LoginPage mode="signup" />} />
+        <Route path="forgot-password" element={<LoginPage mode="reset" />} />
+        <Route path="account/password" element={<LoginPage mode="password" />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

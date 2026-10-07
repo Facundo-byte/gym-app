@@ -20,9 +20,6 @@
 .routine-detail { display: grid; gap: var(--space-6); }
 .routine-day-selector { display: flex; flex-wrap: wrap; gap: var(--space-3); }
 .routine-day-selector .button[aria-pressed='true'] { background: var(--color-accent); color: var(--color-background); }
-.routine-day-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
-.routine-day-heading h2 { font-size: 22px; line-height: 30px; }
-.routine-day-heading p { color: var(--color-muted); font-size: 13px; }
 .routine-reference-notice { color: var(--color-warning); font-size: 13px; line-height: 1.7; margin-top: var(--space-4); }
 .routine-detail__actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-4); }
 .routine-detail__mobile-edit { display: none; }
@@ -38,7 +35,6 @@
   .routine-form { margin-top: 28px; }
   .routine-detail__actions { display: grid; gap: var(--space-3); }
   .routine-detail__mobile-edit { display: flex; }
-  .routine-day-heading h2 { font-size: 20px; }
 }
 @media (max-width: 339px) {
   .weekday-picker__options { grid-template-columns: minmax(0, 1fr); }

@@ -1,0 +1,18 @@
+.account-card { max-width: 560px; padding: var(--space-7); }
+.auth-form, .account-panel { display: grid; gap: var(--space-5); }
+.auth-links { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3) var(--space-5); }
+.auth-notice, .account-panel p { color: var(--color-muted); font-size: 14px; line-height: 1.8; }
+.account-email { color: var(--color-accent) !important; overflow-wrap: anywhere; }
+.auth-success { color: var(--color-accent); font-size: 14px; line-height: 1.8; }
+.account-notice { margin-bottom: var(--space-6); }
+.account-status { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); margin-bottom: var(--space-6); color: var(--color-muted); font-size: 12px; line-height: 1.7; }
+.account-status a { color: var(--color-accent); min-height: 44px; display: inline-flex; align-items: center; }
+.account-status span { align-self: center; overflow-wrap: anywhere; }
+.nav-link--button { border: 0; background: none; text-align: left; font-family: inherit; }
+.header-error { max-width: 1552px; margin-inline: auto; padding: var(--space-3) var(--space-7); }
+@media (max-width: 767px) {
+  .account-card { max-width: none; padding: var(--space-5); }
+  .auth-form > .button { width: 100%; }
+  .auth-links { align-items: stretch; }
+  .auth-links .button--secondary { width: 100%; }
+}

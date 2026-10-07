@@ -14,14 +14,19 @@
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=src/domain/** --test-coverage-include=src/services/** --test-coverage-exclude=**/*.test.js --test-coverage-exclude=**/testHelpers/**",
     "test:e2e": "npm run build && playwright test",
     "test:e2e:report": "playwright show-report",
+    "test:auth": "playwright test --config playwright.auth.config.js",
+    "test:sync:live": "node --env-file=.env.local --env-file=.env.smoke.local scripts/supabase-smoke.mjs",
+    "test:auth:live": "node --env-file=.env.local --env-file=.env.smoke.local scripts/supabase-browser-smoke.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "2.117.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router": "^8.4.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "1.63.0",
     "@types/react": "^19.2.18",

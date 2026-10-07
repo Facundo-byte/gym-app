@@ -7,6 +7,8 @@
 
 This document defines the application to build and the acceptance criteria for each milestone. [AGENTS.md](../AGENTS.md) defines how the coding agent must work. Reading this roadmap does not authorize implementation: build only the milestone explicitly requested by the user, verify it, and stop for review.
 
+**Delivered status (October 7, 2026):** Milestones 1–11 were explicitly authorized and implemented, including the optional Supabase account milestone. Guest use remains complete without provider configuration. The owner confirmed actual confirmation/recovery emails working before requesting Milestone 11. [MILESTONE_11_ACCEPTANCE.md](MILESTONE_11_ACCEPTANCE.md) records final verification and remaining limits; earlier milestone reports retain their historical scope. New features or deployment require a separate request.
+
 ## 1. Product goal and scope
 
 Build a responsive application that lets a person organize gym exercises and recurring weekly routines, view today's planned workout, mark it finished, and review completion across the current week. The application must work on desktop and mobile and preserve data after refresh or browser restart.
@@ -632,6 +634,8 @@ Milestone 10 may be skipped. Milestone 11 must be able to finish a complete loca
 6. Failed remote saves and conflicting revisions show actionable errors and retain unsaved input.
 7. Auth/sync tests, lint, build, and a two-device/account smoke test pass with real configured credentials. If they cannot run, identify the unverified acceptance criteria.
 
+**Milestone 10 implementation decisions:** The user selected Supabase and supplied the new project's public connection details. One owner-scoped atomic remote document preserves the existing service transaction boundary, with authenticated-only backend writes and revision comparison. Uploaded images use a private owner/content-addressed bucket; remote documents contain references rather than Base64. Confirmed guest import is restricted to new/unused accounts, preserves the local source, and records a fingerprint for idempotent retries. Synchronization loads on sign-in/refresh and saves successful mutations; offline merging and real-time updates remain outside scope. Session persistence is separate from guest domain storage. Setup, callback URLs, live smoke checks, and image lifecycle limits are in [SUPABASE.md](SUPABASE.md); actual verification and external gaps are tracked in [MILESTONE_10_ACCEPTANCE.md](MILESTONE_10_ACCEPTANCE.md). These decisions do not authorize Milestone 11.
+
 ### Milestone 11 — Final polish and documentation
 
 **Goal:** Deliver a maintainable, documented version of the authorized product.
@@ -650,6 +654,8 @@ Milestone 10 may be skipped. Milestone 11 must be able to finish a complete loca
 3. The README enables a new developer to install, run, and verify the project without relying on this conversation.
 4. Production UI does not imply that an unimplemented optional feature is available.
 5. Final report lists delivered scope, checks, manual test steps, and material remaining limitations.
+
+**Milestone 11 implementation decisions:** The owner explicitly requested this milestone after confirming real email flows. Final cleanup removed unused styles and the unused global gym-service singleton; `StorageProvider` receives its identity-scoped service explicitly. Unconfigured account screens describe guest availability accurately. The README, architecture, provider setup and testing documentation now describe the complete delivered application. All 119 native tests and 22 repeatable browser executions passed, alongside lint, production build/preview and an isolated guest build without Supabase configuration at four widths. Fresh Figma requests remained blocked by the Starter-plan limit; rendered layouts and existing references were reviewed. [The final acceptance report](MILESTONE_11_ACCEPTANCE.md) contains evidence, manual steps and material limits. Stop for owner review.
 
 Deployment or publishing is a separate action unless explicitly included in the user's request. Finishing this milestone does not authorize deployment.
 

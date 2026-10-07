@@ -46,6 +46,9 @@ for (const scenario of cases) {
       await expect(page.getByText(scenario.gap, { exact: true })).toBeVisible()
       await expect(page.getByRole('heading', { name: 'Rest day', exact: true })).toBeVisible()
       await expectProgress(page, scenario.newWeek ? 0 : 1, 2, scenario.newWeek ? 0 : 50)
+      // Reload initializes an asynchronous React chunk; allow its startup timers to run.
+      // All controlled midnight/date-guard assertions above remain on the paused clock.
+      await page.clock.resume()
       await page.reload()
       await expect(page.getByText(scenario.gap, { exact: true })).toBeVisible()
       await expectProgress(page, scenario.newWeek ? 0 : 1, 2, scenario.newWeek ? 0 : 50)

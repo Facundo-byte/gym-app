@@ -1,10 +1,10 @@
-# Testing the local application
+# Testing FORGE
 
-The test suite has two complementary layers. Node's built-in runner checks business rules and persistence with in-memory adapters. Playwright checks the actual production application, React interactions, browser storage events, image decoding, and date updates. No component-test framework or runtime dependency is required.
+Node's built-in runner checks business rules, local persistence, and account adapters. PGlite runs the actual account migration in PostgreSQL with Supabase-compatible auth/storage scaffolding. Playwright checks the production application, React interactions, browser storage events, image decoding, and date updates; a separate account suite uses the real Supabase SDK with intercepted HTTP. No component-test framework is required.
 
 ## Setup and commands
 
-Use Node.js 22.22.0 or newer. Milestone 9 was verified with Node.js 25.9.0, npm 11.12.1, and the locked Playwright 1.63.0 dependency.
+Use Node.js 22.22.0 or newer. Final Milestone 11 verification used Node.js 25.9.0, npm 11.12.1, and the locked Playwright 1.63.0 dependency.
 
 From the repository root:
 
@@ -15,6 +15,7 @@ npm run lint
 npm test
 npm run test:coverage
 npm run test:e2e
+npm run test:auth
 ```
 
 The browser installation is required once per machine, and again when Playwright's browser revision changes. It is separate from `npm ci`. The default browser is Playwright's managed Chromium; no Chrome/Edge installation or login is needed.
@@ -38,7 +39,7 @@ The complete journey attaches configured-day and completed-workout screenshots a
 
 ## Coverage and ownership
 
-There are 105 native tests across eight service-focused test files. They exercise the real domain modules through the service boundary as well as focused storage/image adapters. `npm test` runs the `*.test.js` suite; the browser specs use `*.spec.js` and run separately.
+There are 119 native tests: the original 105 local tests, 13 account/service tests, and one PostgreSQL migration/policy integration test. They exercise domain rules through the service boundary, focused storage/image adapters, auth validation/delegation, identity changes, private-image round trips, async revision checks, failed writes, confirmed import, and PostgreSQL permissions. `npm test` runs `*.test.js`; browser specs use `*.spec.js` and run separately.
 
 | Behavior | Primary native coverage | Browser acceptance coverage |
 | --- | --- | --- |
@@ -71,6 +72,20 @@ Seven scenarios produce 16 executions:
 
 The tests install/control a browser clock before loading the application and assert literal expected calendar dates. They advance the real scheduled midnight callback rather than substituting a production date control. See Playwright's official [clock guidance](https://playwright.dev/docs/clock).
 
+## Account scenarios and live verification
+
+`npm run test:auth` builds into ignored `.auth-test-dist/` with a synthetic public configuration, then starts a private preview on port 4176. It does not replace the normal `dist/` or contact a real Supabase project. Its six executions cover 1440 × 900 desktop and 390 × 844 mobile:
+
+- Login validation/failed credentials with retained inputs, signup confirmation, recovery request/redirect, protected password route, and guest continuation.
+- Explicit import/cancel/focus restoration, idempotent retry, preserved guest plans, private image decoding, completion/history on a second independent session, stale/failed saves with retained drafts, logout failure semantics, and a different account's separate data.
+- Real SDK PKCE callback exchange against fixture HTTP, authenticated password update, and guest continuation clearing account state.
+
+View screenshots with `npx playwright show-report playwright-auth-report`. Fixture responses exercise actual UI/SDK behavior but do not prove Supabase's deployed RLS or email delivery. `supabase/tests/account-sync.test.js` independently executes the unmodified migration and checks anonymous denial, two owners, revoked direct writes, revision conflicts, import retries, duplicate completion rejection, and immutable private-image policies.
+
+For live verification, configure the project/migration and two unused confirmed test accounts as described in [SUPABASE.md](SUPABASE.md), then run `npm run test:sync:live`. This opt-in check writes named fixtures to disposable accounts, verifies real provider API ownership and independent-session refresh, and leaves its fixture for review. It refuses custom account data. Actual email delivery/recovery and physical-device usability additionally need the documented manual review. Keep live credentials in ignored `.env.smoke.local`, never browser fixtures or tracked files.
+
+After that successful API run, `npm run test:auth:live` uses the normal preview on port 4173 with new desktop/mobile Chromium contexts and real credentials. It edits only the named API fixture, verifies actual UI/SDK sync, private images, stale drafts, logout/guest continuation and account B separation, and keeps screenshots locally in ignored `test-results/live/`. No password-bearing traces/reports are recorded. These opt-in live checks are separate from repeatable fixture suites; rerunning requires the documented unused accounts/original fixture.
+
 ## Isolation
 
 Every browser test gets a new disposable context and starts without saved routines or history. Creating the second tab in the same context deliberately shares storage for the stale-save case. Test data, upload pixels, downloads, storage faults, and clock changes remain inside those contexts. Native tests use injected in-memory adapters and controlled clocks. Neither suite changes the user's system clock or browser profile.
@@ -81,7 +96,7 @@ Use a separate disposable profile for exploratory failure checks too. Do not cor
 
 Use a new disposable browser profile with `npm run build` and `npm run preview`. Review at 390 and 1440 CSS px, and inspect intermediate widths at 768 and 1024 px. The browser report provides matching screenshots from the repeatable journey.
 
-1. Start on Home. Check Rest day, all seven indicators, and the zero-session message. Visit Exercises/Routines/Login and an unknown address; check their empty/placeholder/recovery states and Back/Forward.
+1. Start on Home. Check Rest day, all seven indicators, and the zero-session message. Visit Exercises/Routines/Login and an unknown address; check their empty/account/recovery states and Back/Forward.
 2. Create an exercise with a PNG/JPEG image. Submit missing fields first, then valid trimmed text. Search with mixed case/spaces, try a query with no results, and clear it. Refresh and reopen the exercise; verify its name and decoded image.
 3. Create a routine with today's weekday and another weekday. Configure different sets/reps/weights on each day, including zero and a decimal weight. Submit fractional sets or negative weight first; check associated errors and retained drafts.
 4. Add a repeated exercise and another exercise. Reorder using the keyboard; check boundary buttons/focus and saved order after refresh. Switch days, refresh, and use Back/Forward; verify the other day's targets are unchanged.
@@ -95,4 +110,12 @@ The automated date/storage specs reproduce unsafe-to-perform-on-real-data condit
 
 The checked-in browser suite currently uses Chromium only; mobile is emulated, not a physical phone or WebKit browser. Physical keyboards, screen-reader speech, and additional browser engines require separate verification. Automated checks and screenshots complement those checks without claiming to replace them.
 
-Figma Starter-plan tool access remained blocked during Milestone 9. Visual review uses the existing documented reference, tokens, and rendered application; no fresh pixel comparison with unavailable frames is claimed. Local storage remains device/browser specific and cannot guarantee a transaction between simultaneously writing tabs. Download exports do not provide a restore/import UI. Authentication and synchronization remain optional future work requiring explicit authorization.
+Figma Starter-plan tool access remained blocked through Milestone 11. Visual review uses the existing documented reference, tokens, and rendered application; no fresh pixel comparison with unavailable frames is claimed. Local storage remains device/browser specific and cannot guarantee a transaction between simultaneously writing tabs. Download exports do not provide a restore/import UI. Account authentication/synchronization are available when configured; live project checks and email delivery must be recorded separately from intercepted browser tests. See SUPABASE.md for setup and limits.
+
+## Final verification record
+
+On October 7, 2026, Milestone 11 passed lint, all 119 native tests, domain/service coverage, the 16 production browser executions and all six account fixture executions. Coverage was 99.64% lines, 95.28% branches and 96.07% functions. The normal production build and existing preview on port 4173 also passed.
+
+An additional one-off guest check built without Supabase public configuration into ignored `.guest-test-dist/` and used a private preview on port 4177. Four disposable contexts at 390/768/1024/1440 px verified Home, truthful disabled account controls, guest continuation, exercise creation, refresh persistence, no horizontal overflow and no uncaught errors. Its server/contexts were closed afterward. Screenshots are under ignored `test-results/milestone-11/`. This is separate from the 22 repeatable browser-suite executions; it adds no production test switch or dependency.
+
+Configured-day/completed-workout, account login/password-update and unconfigured guest screenshots were visually inspected. Real deployed API/account browser checks passed during Milestone 10; they were not repeated against the now-used disposable fixtures during final polish. The owner subsequently confirmed actual confirmation/recovery emails working. [MILESTONE_11_ACCEPTANCE.md](MILESTONE_11_ACCEPTANCE.md) records delivered scope, acceptance evidence, reproducible manual checks and remaining limits.

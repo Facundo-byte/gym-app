@@ -28,9 +28,7 @@
 .home-grid { display: grid; grid-template-columns: minmax(0, 820fr) minmax(0, 440fr); gap: var(--space-8); }
 .collection-placeholder { min-height: 260px; display: grid; align-items: center; }
 .exercise-toolbar { display: flex; justify-content: space-between; align-items: start; gap: var(--space-6); margin-bottom: var(--space-6); }
-.exercise-toolbar .field { width: min(560px, 100%); }
 .mobile-page-action { display: none; }
-.account-placeholder { max-width: 650px; }
 .app-footer { width: 100%; max-width: 1552px; margin-inline: auto; padding: var(--space-4) var(--space-9) var(--space-6); }
 .app-footer .button { font-size: 12px; }
 @media (max-width: 1023px) {

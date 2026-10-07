@@ -7,7 +7,7 @@ import Card from './Card.jsx'
 import Dialog from './Dialog.jsx'
 
 export default function StorageNotice() {
-  const { status, error, noticeError, recovery, dangling, retry, reset, applyRecovery, exportSavedData } = useStorage()
+  const { status, mode, error, noticeError, recovery, dangling, retry, reset, applyRecovery, exportSavedData } = useStorage()
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [actionError, setActionError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -16,7 +16,7 @@ export default function StorageNotice() {
   const lock = useRef(false)
 
   const failure = noticeError ?? error
-  const canReset = !noticeError && ['corrupt', 'invalid', 'ambiguous'].includes(error?.code)
+  const canReset = mode !== 'account' && !noticeError && ['corrupt', 'invalid', 'ambiguous'].includes(error?.code)
   if (status !== 'error' && !noticeError && !recovery && !dangling.length && !feedback) return null
 
   async function confirmAction() {
@@ -68,7 +68,7 @@ export default function StorageNotice() {
   return (
     <>
       <Card className="storage-notice" role={failure || recovery ? 'alert' : 'status'} aria-labelledby="storage-heading">
-        <h2 id="storage-heading">{failure ? 'Local storage needs your attention' : recovery ? 'Review local data recovery' : dangling.length ? 'Some exercise references need attention' : 'Local data updated'}</h2>
+        <h2 id="storage-heading">{failure ? mode === 'account' ? 'Account data needs your attention' : 'Local storage needs your attention' : recovery ? 'Review local data recovery' : dangling.length ? 'Some exercise references need attention' : 'Local data updated'}</h2>
         {failure && <p>{failure.message}</p>}
         {noticeError && <p>Your current drafts are still here. Reload page opens the latest saved data and discards unsaved drafts. Copy any changes you want to keep first.</p>}
         {!noticeError && recovery && <>

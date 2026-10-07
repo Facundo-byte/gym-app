@@ -12,10 +12,15 @@ export function createGymService(adapter = createStorageAdapter(), { now = () =>
   let document
   let recovery
   let pending = Promise.resolve()
+  let disposed = false
+
+  function assertActive() {
+    if (disposed) throw new StorageError('account-changed', 'The account changed. This operation was stopped; no data was saved to another account.')
+  }
 
   // Serialize service operations so overlapping requests cannot lose a saved edit.
   function enqueue(operation) {
-    const result = pending.then(operation)
+    const result = pending.then(() => { assertActive(); return operation() })
     pending = result.catch(() => {})
     return result
   }
@@ -24,6 +29,7 @@ export function createGymService(adapter = createStorageAdapter(), { now = () =>
     document = undefined
     recovery = undefined
     const loaded = await adapter.load({ createInitialDocument: () => createStarterDocument(now()) })
+    assertActive()
     document = validateAppData(loaded)
     return structuredClone(document)
   }
@@ -33,7 +39,8 @@ export function createGymService(adapter = createStorageAdapter(), { now = () =>
     recovery = undefined
     const loaded = await adapter.load({ createInitialDocument: () => createStarterDocument(now()), allowInvalidRecords: true })
     const inspected = inspectAppData(loaded)
-    adapter.assertCurrent?.()
+    await adapter.assertCurrent?.()
+    assertActive()
     document = inspected.data
     recovery = inspected.recovery
     return structuredClone(inspected)
@@ -41,7 +48,8 @@ export function createGymService(adapter = createStorageAdapter(), { now = () =>
 
   async function mutate(transform, initializeTracking = false) {
     if (!document) await load()
-    adapter.assertCurrent?.()
+    await adapter.assertCurrent?.()
+    assertActive()
     if (recovery) throw new StorageError('repair-required', 'Review the local data recovery notice before saving. Your draft and original data have been kept.')
     const timestamp = now()
     const today = formatLocalDate(new Date(timestamp))
@@ -51,6 +59,7 @@ export function createGymService(adapter = createStorageAdapter(), { now = () =>
     const next = validateAppData(reconcileWorkouts(transformed, today, initializeTracking))
     if (JSON.stringify(next) === JSON.stringify(document)) return structuredClone(document)
     const saved = await adapter.save(next)
+    assertActive()
     document = saved
     return structuredClone(saved)
   }
@@ -76,11 +85,23 @@ export function createGymService(adapter = createStorageAdapter(), { now = () =>
     loadAppData: () => enqueue(load),
     inspectAppData: () => enqueue(inspect),
     subscribeToStorage: (onError) => adapter.subscribe?.(onError) ?? (() => {}),
+    dispose: () => { disposed = true; document = undefined; recovery = undefined; adapter.dispose?.() },
+    importGuestData: (proposal, { confirmed = false } = {}) => enqueue(async () => {
+      if (!confirmed) throw new StorageError('confirmation', 'Confirm the guest import before saving.')
+      if (!adapter.importDocument) throw new StorageError('configuration', 'Guest data can only be imported into an account.')
+      await proposal.assertUnchanged()
+      const saved = await adapter.importDocument(validateAppData(proposal.document), proposal.hash)
+      assertActive()
+      document = saved
+      recovery = null
+      return structuredClone(saved)
+    }),
     exportSavedData: () => enqueue(() => adapter.exportRaw()),
     applyRecovery: ({ confirmed = false } = {}) => enqueue(async () => {
       if (!confirmed) throw new StorageError('confirmation', 'Confirm the listed recovery changes before saving.')
       if (!recovery || !document) throw new StorageError('missing', 'There is no pending recovery. Reload to inspect the saved data.')
       const saved = await adapter.save(validateAppData(document))
+      assertActive()
       document = saved
       recovery = null
       return structuredClone(saved)
@@ -110,12 +131,14 @@ export function createGymService(adapter = createStorageAdapter(), { now = () =>
     }, true)),
     getExercises: () => enqueue(async () => {
       if (!document) await load()
-      adapter.assertCurrent?.()
+      await adapter.assertCurrent?.()
+      assertActive()
       return structuredClone(document.exercises)
     }),
     getRoutines: () => enqueue(async () => {
       if (!document) await load()
-      adapter.assertCurrent?.()
+      await adapter.assertCurrent?.()
+      assertActive()
       return structuredClone(document.routines)
     }),
     saveAppData: (data) => enqueue(() => mutate(() => data)),
@@ -188,5 +211,3 @@ export function createGymService(adapter = createStorageAdapter(), { now = () =>
     reorderAssignments: (routineId, dayOfWeek, orderedIds) => enqueue(() => mutate((data) => changeDay(data, routineId, dayOfWeek, (assignments) => reorderDayAssignments(assignments, orderedIds)))),
   }
 }
-
-export const gymService = createGymService()

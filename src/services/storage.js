@@ -15,6 +15,20 @@ export function createEmptyDocument() {
   return { schemaVersion: SCHEMA_VERSION, trackingStartedOn: null, exercises: [], routines: [], weeklySchedules: [], workoutLogs: [] }
 }
 
+// Supabase owns session serialization; browser access stays at this boundary.
+export function createSessionStorage(getStorage = () => window.localStorage) {
+  function access(operation) {
+    try { return operation(getStorage()) } catch (cause) {
+      throw new StorageError('unavailable', 'Account session storage is unavailable. Allow browser storage and try again.', cause)
+    }
+  }
+  return {
+    getItem: (key) => access((storage) => storage.getItem(key)),
+    setItem: (key, value) => access((storage) => storage.setItem(key, value)),
+    removeItem: (key) => access((storage) => storage.removeItem(key)),
+  }
+}
+
 function validateDocument(data, allowInvalidRecords = false) {
   if (!data || typeof data !== 'object' || Array.isArray(data)) {
     throw new StorageError('invalid', 'The saved data is not a readable FORGE document.')
