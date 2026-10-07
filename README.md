@@ -13,6 +13,7 @@ Milestones 1–11 implement the authorized scope. [The final acceptance report](
 - Validated versioned storage, disclosed recovery, exact original-data downloads, confirmed destructive actions, preserved drafts after failures and stale-update notices.
 - Optional signup, login, confirmation/recovery emails, password change, logout, private images, confirmed guest import into an unused account and remote revision conflicts.
 - Responsive layouts, keyboard navigation, accessible labels/errors/dialogs, visible focus, readable weekday states and locally bundled Manrope.
+- English/Spanish interface with a header language button, remembered browser preference, translated starter names/search and localized dates, weights and messages. User-written names and saved plans keep their original values; see [LANGUAGES.md](docs/LANGUAGES.md).
 
 Nine starter exercises are saved once for a new guest installation or account, with matching bundled illustrations available to existing libraries too. Uploaded personal images take priority. Replace their files or change the central catalog as described in [EXERCISE_IMAGES.md](docs/EXERCISE_IMAGES.md); defaults do not consume document storage or require a Supabase migration. No demo routines or fake completions are created. Deleting every exercise keeps the library empty after refresh.
 
@@ -49,7 +50,7 @@ npm run test:e2e
 npm run test:auth
 ```
 
-Chromium installation is required once per locked Playwright browser revision. `test:e2e` builds normal production output and runs 18 isolated executions at 390/768/1024/1440 px on port **4175**. `test:auth` builds separately to `.auth-test-dist/` and runs desktop/mobile account cases with intercepted fixture HTTP on port **4176**. Keep those ports free. Tests do not use real account credentials or the user's browser profile; their servers are never reused.
+Chromium installation is required once per locked Playwright browser revision. `test:e2e` builds normal production output and runs 22 isolated executions at 390/768/1024/1440 px on port **4175**. `test:auth` builds separately to `.auth-test-dist/` and runs eight desktop/mobile account executions with intercepted fixture HTTP on port **4176**. Both include Spanish acceptance scenarios. Keep those ports free. Tests do not use real account credentials or the user's browser profile; their servers are never reused.
 
 `npm test` uses Node's native runner, including the actual migration in PostgreSQL/PGlite. Coverage measures domain/services, excluding React, SQL, SDK internals and browser execution. Playwright and PGlite are development dependencies; Supabase is the optional account runtime. Reports/screenshots are ignored by Git:
 
@@ -71,6 +72,7 @@ src/
   components/   Shared forms, controls, cards, dialogs, workout/progress UI
   config/       Central starter-exercise names, muscles and bundled illustration paths
   domain/       Pure validation, dates, scheduling, snapshots and weekly calculations
+  i18n/         Language context, Spanish copy and localized presentation helpers
   layouts/      Responsive navigation and application shell
   pages/        Lists, editors, day details, Home and account screens
   services/     Gym operations, local storage, authentication, remote data/images

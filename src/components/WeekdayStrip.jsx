@@ -1,3 +1,4 @@
+import { useLanguage } from '../i18n/useLanguage.js'
 import { parseLocalDate } from '../domain/dates.js'
 import { weekdayName } from '../domain/routines.js'
 
@@ -11,13 +12,14 @@ const states = {
 }
 
 export default function WeekdayStrip({ days }) {
+  const { t, locale } = useLanguage()
   return (
-    <ol className="weekday-strip" aria-label="This week's workout states">
+    <ol className="weekday-strip" aria-label={t("This week's workout states")}>
       {days.map((day) => {
-        const name = weekdayName(day.dayOfWeek)
+        const name = t(weekdayName(day.dayOfWeek))
         const state = states[day.state]
-        const date = parseLocalDate(day.date).toLocaleDateString('en', { month: 'long', day: 'numeric' })
-        const label = `${name}, ${date}${day.isToday ? ', today' : ''}: ${state.label}.${day.scheduled ? ` ${day.completed} of ${day.scheduled} workouts completed.` : ''}`
+        const date = parseLocalDate(day.date).toLocaleDateString(locale, { month: 'long', day: 'numeric' })
+        const label = `${name}, ${date}${day.isToday ? t(', today') : ''}: ${t(state.label)}.${day.scheduled ? ` ${t('{completed} of {scheduled} workouts completed.', { completed: day.completed, scheduled: day.scheduled })}` : ''}`
         return (
           <li key={day.date} data-state={day.state} aria-label={label} title={label} aria-current={day.isToday ? 'date' : undefined}>
             <span className="weekday-strip__name weekday-strip__name--full" aria-hidden="true">{name.slice(0, 3).toUpperCase()}</span>

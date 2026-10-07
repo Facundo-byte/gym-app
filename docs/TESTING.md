@@ -35,11 +35,11 @@ To inspect the HTML report, screenshots, and any failure traces:
 npm run test:e2e:report
 ```
 
-The complete journey attaches configured-day and completed-workout screenshots at each width. The starter-image storage scenario additionally attaches desktop/mobile library screenshots. Failures retain screenshots and traces. Generated `test-results/` and `playwright-report/` directories are ignored by Git and lint. A new run replaces the previous report, so retain any evidence needed before rerunning. Tests have no automatic retries; investigate a failure rather than hiding it with a retry count.
+The complete journey attaches configured-day and completed-workout screenshots at each width. The starter-image storage scenario additionally attaches desktop/mobile library screenshots. The language scenario captures Spanish library and Home screens. Failures retain screenshots and traces. Generated `test-results/` and `playwright-report/` directories are ignored by Git and lint. A new run replaces the previous report, so retain any evidence needed before rerunning. Tests have no automatic retries; investigate a failure rather than hiding it with a retry count.
 
 ## Coverage and ownership
 
-There are 119 native tests: the original 105 local tests, 13 account/service tests, and one PostgreSQL migration/policy integration test. They exercise domain rules through the service boundary, focused storage/image adapters, auth validation/delegation, identity changes, private-image round trips, async revision checks, failed writes, confirmed import, and PostgreSQL permissions. `npm test` runs `*.test.js`; browser specs use `*.spec.js` and run separately.
+There are 124 native tests: the original 105 local tests, 13 account/service tests, one PostgreSQL migration/policy integration test, and five translation/preference tests. They exercise domain rules through the service boundary, focused storage/image adapters, auth validation/delegation, identity changes, private-image round trips, async revision checks, failed writes, confirmed import, and PostgreSQL permissions. `npm test` runs `*.test.js`; browser specs use `*.spec.js` and run separately.
 
 | Behavior | Primary native coverage | Browser acceptance coverage |
 | --- | --- | --- |
@@ -51,32 +51,35 @@ There are 119 native tests: the original 105 local tests, 13 account/service tes
 | Unique/idempotent completion, concurrent requests, failed finish preserving state | `workouts.test.js` | Finish, disabled completed action, focus, refresh, preserved completion |
 | Frozen schedules, reconciliation, multiple workouts per day, valid denominator, 3/4 = 75%, zero-session weeks | `weeklyProgress.test.js`, `workouts.test.js` | Seven indicators, 0/0, 0/2, 1/2 = 50%, preserved history and reconciled 1/1 = 100% |
 | Missing/empty/corrupt/unsupported storage, duplicates, exact export, reset, blocked/quota/stale writes | `storage.test.js`, `dataIntegrity.test.js` | Original download, recovery cancel/approval, quota retry, draft retention, real two-tab stale save |
+| English/Spanish presentation, original user data, localized search, isolated preference and failure fallback | `src/i18n/translate.test.js` | Spanish workflow, draft/error retention, refresh, provider messages and account import |
 | Local/UTC difference, week/month/leap/year boundaries, DST, reopen after a gap | `workouts.test.js`, `weeklyProgress.test.js` | Open-tab midnight timer, date guard, focus/visibility refresh, reload in three timezones |
 
 `npm run test:coverage` uses Node's experimental coverage reporting. It measures production files in `src/domain/` and `src/services/`, excluding tests and test helpers. It does **not** measure React/UI coverage or count browser execution toward the percentages. Timezone subprocess checks are independently asserted; their child-process coverage is not added to the parent report. Use the report to find meaningful omissions, not to justify tests of incidental implementation details or an arbitrary 100% target.
 
 ## Browser scenarios and viewports
 
-Eight scenarios produce 18 executions:
+Ten scenarios produce 22 executions:
 
 | Project | CSS viewport | Scenarios |
 | --- | --- | --- |
-| `desktop` | 1440 × 900 | Complete journey, three storage cases, four date cases |
-| `mobile` | 390 × 844, touch/mobile emulation | Complete journey, three storage cases, four date cases |
+| `desktop` | 1440 × 900 | Complete journey, three storage cases, four date cases, two language cases |
+| `mobile` | 390 × 844, touch/mobile emulation | Complete journey, three storage cases, four date cases, two language cases |
 | `tablet` | 768 × 900 | Complete journey |
 | `compact-desktop` | 1024 × 900 | Complete journey |
 
 - `e2e/journey.spec.js`: exercise → image → routine → days → assignments/targets/order → Home → finish → progress → refresh; then live rename, confirmed cascades, and readable saved history. Controls are activated by keyboard with focus checks. Layout checks reject page-wide overflow.
 - `e2e/storage.spec.js`: bundled starter images decoding/fitting without rewriting legacy bytes, retained/default-restored personal uploads, invalid replacements, renamed starters and missing-file fallbacks; original-data recovery/download, keyboard dialog containment and cancel, failed writes and retries, retained drafts after approved repair, and updates shared by two tabs. This is the only browser spec that directly reads/injects the application's storage key, as a focused adapter test.
+- `e2e/language.spec.js`: bilingual search, keyboard language switching, draft/error retention, exact guest-byte preservation, refresh preference, canonical starter/muscle values, Spanish routine/assignment/completion and a blocked preference write. Storage inspection uses disposable context snapshots; the failure fixture targets only the separate language key.
 - `e2e/dates.spec.js`: Argentina Sunday January 3 → Monday January 4, 2027; Auckland local Monday while UTC is Sunday; leap-day February 29 → March 1, 2028; and New York midnight following the 23-hour DST day on March 8, 2026. All cases also reject finishing a stale dated card, refresh after visibility changes, and verify persisted counts.
 
 The tests install/control a browser clock before loading the application and assert literal expected calendar dates. They advance the real scheduled midnight callback rather than substituting a production date control. See Playwright's official [clock guidance](https://playwright.dev/docs/clock).
 
 ## Account scenarios and live verification
 
-`npm run test:auth` builds into ignored `.auth-test-dist/` with a synthetic public configuration, then starts a private preview on port 4176. It does not replace the normal `dist/` or contact a real Supabase project. Its six executions cover 1440 × 900 desktop and 390 × 844 mobile:
+`npm run test:auth` builds into ignored `.auth-test-dist/` with a synthetic public configuration, then starts a private preview on port 4176. It does not replace the normal `dist/` or contact a real Supabase project. Its eight executions cover 1440 × 900 desktop and 390 × 844 mobile:
 
 - Login validation/failed credentials with retained inputs, signup confirmation, recovery request/redirect, protected password route, and guest continuation.
+- Spanish login/provider errors, signup/recovery feedback, password validation, import summary and language persistence through sign-in/logout.
 - Explicit import/cancel/focus restoration, idempotent retry, preserved guest plans, private image decoding, completion/history on a second independent session, stale/failed saves with retained drafts, logout failure semantics, and a different account's separate data.
 - Real SDK PKCE callback exchange against fixture HTTP, authenticated password update, and guest continuation clearing account state.
 

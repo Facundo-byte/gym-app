@@ -1,3 +1,4 @@
+import { useLanguage } from '../i18n/useLanguage.js'
 import { useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import { useStorage } from '../app/useStorage.js'
@@ -10,6 +11,7 @@ import AssignmentDayPanel from '../components/AssignmentDayPanel.jsx'
 import { Button, ButtonLink } from '../components/Button.jsx'
 
 function RoutineDetail({ routine, exercises }) {
+  const { t } = useLanguage()
   const { deleteRoutine } = useStorage()
   const { state } = useLocation()
   const [search, setSearch] = useSearchParams()
@@ -39,40 +41,41 @@ function RoutineDetail({ routine, exercises }) {
 
   return (
     <>
-      <PageHeader eyebrow="TRAINING PLANS" title={routine.name} description={sortedDays.map((item) => weekdayName(item.dayOfWeek)).join(' · ')} action={<ButtonLink to={editPath} variant="secondary">Edit routine</ButtonLink>} />
-      {state?.message && <p className="routine-status" role="status">{state.message}</p>}
+      <PageHeader eyebrow={t("TRAINING PLANS")} title={routine.name} description={sortedDays.map((item) => t(weekdayName(item.dayOfWeek))).join(' · ')} action={<ButtonLink to={editPath} variant="secondary">{t("Edit routine")}</ButtonLink>} />
+      {state?.message && <p className="routine-status" role="status">{t(state.message)}</p>}
       <div className="page-body routine-detail">
-        <div className="routine-day-selector" role="group" aria-label="Routine training days">
-          {sortedDays.map((item) => <Button key={item.dayOfWeek} variant="secondary" aria-pressed={item.dayOfWeek === day.dayOfWeek} aria-controls="routine-day-panel" onClick={() => setSearch({ day: String(item.dayOfWeek) })}>{weekdayName(item.dayOfWeek)}</Button>)}
+        <div className="routine-day-selector" role="group" aria-label={t("Routine training days")}>
+          {sortedDays.map((item) => <Button key={item.dayOfWeek} variant="secondary" aria-pressed={item.dayOfWeek === day.dayOfWeek} aria-controls="routine-day-panel" onClick={() => setSearch({ day: String(item.dayOfWeek) })}>{t(weekdayName(item.dayOfWeek))}</Button>)}
         </div>
-        <p className="sr-only" role="status">{weekdayName(day.dayOfWeek)} selected.</p>
+        <p className="sr-only" role="status">{t('{day} selected.', { day: t(weekdayName(day.dayOfWeek)) })}</p>
         <AssignmentDayPanel key={`${routine.id}:${day.dayOfWeek}`} routine={routine} day={day} exercises={exercises} />
         <div className="routine-detail__actions">
-          <ButtonLink to={editPath} variant="secondary" className="routine-detail__mobile-edit">Edit routine</ButtonLink>
-          <Button variant="danger" onClick={() => { setError(''); setDeleteOpen(true) }}>Delete routine</Button>
-          <ButtonLink to="/routines" variant="text">Back to routines</ButtonLink>
+          <ButtonLink to={editPath} variant="secondary" className="routine-detail__mobile-edit">{t("Edit routine")}</ButtonLink>
+          <Button variant="danger" onClick={() => { setError(''); setDeleteOpen(true) }}>{t("Delete routine")}</Button>
+          <ButtonLink to="/routines" variant="text">{t("Back to routines")}</ButtonLink>
         </div>
       </div>
-      <ConfirmActionDialog open={deleteOpen} title="Delete routine?" confirmLabel="Delete routine" onConfirm={remove} onClose={() => setDeleteOpen(false)} busy={deleting} error={error}>
-        <p>Delete “{routine.name}” and its {routine.days.length} training {routine.days.length === 1 ? 'day' : 'days'}? This cannot be undone.</p>
-        {assignmentCount > 0 && <p>This removes {assignmentCount} live exercise {assignmentCount === 1 ? 'assignment' : 'assignments'} from the routine.</p>}
-        <p>Past workout history will be kept. Exercises in your library will not be deleted.</p>
+      <ConfirmActionDialog open={deleteOpen} title={t("Delete routine?")} confirmLabel={t("Delete routine")} onConfirm={remove} onClose={() => setDeleteOpen(false)} busy={deleting} error={error}>
+        <p>{t(routine.days.length === 1 ? 'Delete “{name}” and its {count} training day? This cannot be undone.' : 'Delete “{name}” and its {count} training days? This cannot be undone.', { name: routine.name, count: routine.days.length })}</p>
+        {assignmentCount > 0 && <p>{t(assignmentCount === 1 ? 'This removes {count} live exercise assignment from the routine.' : 'This removes {count} live exercise assignments from the routine.', { count: assignmentCount })}</p>}
+        <p>{t("Past workout history will be kept. Exercises in your library will not be deleted.")}</p>
       </ConfirmActionDialog>
     </>
   )
 }
 
 export default function RoutineDetailPage() {
+  const { t } = useLanguage()
   const { id } = useParams()
   const { status, data } = useStorage()
   const routine = data?.routines.find((item) => item.id === id)
   if (status === 'ready' && routine) return <RoutineDetail key={id} routine={routine} exercises={data.exercises} />
   return (
     <>
-      <PageHeader eyebrow="TRAINING PLANS" title={status === 'ready' ? 'Routine not found' : 'Routine'} />
-      {status === 'loading' && <p className="routine-status" role="status">Loading your routine…</p>}
-      {status === 'error' && <Card className="page-body"><EmptyState title="Your routine is unavailable" description="Resolve the storage issue above to safely view and save routines."><ButtonLink to="/routines">Back to routines</ButtonLink></EmptyState></Card>}
-      {status === 'ready' && <Card className="page-body"><EmptyState title="Choose another training plan" description="This routine may have been deleted, or the address is incorrect."><ButtonLink to="/routines">Back to routines</ButtonLink></EmptyState></Card>}
+      <PageHeader eyebrow={t("TRAINING PLANS")} title={status === 'ready' ? t("Routine not found") : t("Routine")} />
+      {status === 'loading' && <p className="routine-status" role="status">{t("Loading your routine…")}</p>}
+      {status === 'error' && <Card className="page-body"><EmptyState title={t("Your routine is unavailable")} description={t("Resolve the storage issue above to safely view and save routines.")}><ButtonLink to="/routines">{t("Back to routines")}</ButtonLink></EmptyState></Card>}
+      {status === 'ready' && <Card className="page-body"><EmptyState title={t("Choose another training plan")} description={t("This routine may have been deleted, or the address is incorrect.")}><ButtonLink to="/routines">{t("Back to routines")}</ButtonLink></EmptyState></Card>}
     </>
   )
 }

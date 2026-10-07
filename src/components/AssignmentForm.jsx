@@ -1,3 +1,4 @@
+import { useLanguage } from '../i18n/useLanguage.js'
 import { useId, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useStorage } from '../app/useStorage.js'
@@ -8,6 +9,7 @@ import TextField from './TextField.jsx'
 import { Button, ButtonLink } from './Button.jsx'
 
 export default function AssignmentForm({ routine, day, assignment, exercises }) {
+  const { t } = useLanguage()
   const { saveAssignment } = useStorage()
   const navigate = useNavigate()
   const [draft, setDraft] = useState({ exerciseId: assignment?.exerciseId ?? '', sets: assignment ? String(assignment.sets) : '', reps: assignment ? String(assignment.reps) : '', targetWeight: assignment ? String(assignment.targetWeight) : '' })
@@ -58,15 +60,15 @@ export default function AssignmentForm({ routine, day, assignment, exercises }) 
     <form className="assignment-form" noValidate onSubmit={submit} aria-busy={saving}>
       <ExercisePicker exercises={exercises} value={draft.exerciseId} onChange={(exerciseId) => update('exerciseId', exerciseId)} error={errors.exerciseId} disabled={saving} firstInputRef={exerciseRef} searchRef={searchRef} />
       <div className="assignment-targets">
-        <TextField label="Sets" type="number" inputMode="numeric" min="1" step="1" placeholder="4" value={draft.sets} onChange={(event) => update('sets', event.target.value)} error={errors.sets} required disabled={saving} ref={setsRef} />
-        <TextField label="Reps" type="number" inputMode="numeric" min="1" step="1" placeholder="8" value={draft.reps} onChange={(event) => update('reps', event.target.value)} error={errors.reps} required disabled={saving} ref={repsRef} />
-        <TextField label="Target weight (kg)" type="number" inputMode="decimal" min="0" step="0.5" placeholder="70" value={draft.targetWeight} onChange={(event) => update('targetWeight', event.target.value)} error={errors.targetWeight} aria-describedby={weightHintId} required disabled={saving} ref={weightRef} />
+        <TextField label={t("Sets")} type="number" inputMode="numeric" min="1" step="1" placeholder="4" value={draft.sets} onChange={(event) => update('sets', event.target.value)} error={errors.sets} required disabled={saving} ref={setsRef} />
+        <TextField label={t("Reps")} type="number" inputMode="numeric" min="1" step="1" placeholder="8" value={draft.reps} onChange={(event) => update('reps', event.target.value)} error={errors.reps} required disabled={saving} ref={repsRef} />
+        <TextField label={t("Target weight (kg)")} type="number" inputMode="decimal" min="0" step="0.5" placeholder="70" value={draft.targetWeight} onChange={(event) => update('targetWeight', event.target.value)} error={errors.targetWeight} aria-describedby={weightHintId} required disabled={saving} ref={weightRef} />
       </div>
-      <p className="field__hint" id={weightHintId}>Use 0 kg for bodyweight or no added weight. Decimal weights are allowed.</p>
-      {saveError && <p className="field__error" role="alert">{saveError}</p>}
+      <p className="field__hint" id={weightHintId}>{t("Use 0 kg for bodyweight or no added weight. Decimal weights are allowed.")}</p>
+      {saveError && <p className="field__error" role="alert">{t(saveError)}</p>}
       <div className="assignment-form__actions">
-        <Button type="submit" disabled={saving}>{saving ? 'Saving…' : assignment ? 'Save targets' : 'Add to training day'}</Button>
-        <ButtonLink to={backPath} variant="text" onClick={(event) => { if (saving) event.preventDefault() }} aria-disabled={saving || undefined}>Cancel</ButtonLink>
+        <Button type="submit" disabled={saving}>{saving ? t("Saving…") : assignment ? t("Save targets") : t("Add to training day")}</Button>
+        <ButtonLink to={backPath} variant="text" onClick={(event) => { if (saving) event.preventDefault() }} aria-disabled={saving || undefined}>{t("Cancel")}</ButtonLink>
       </div>
     </form>
   )

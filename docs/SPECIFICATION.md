@@ -13,6 +13,8 @@ This document defines the application to build and the acceptance criteria for e
 
 ## 1. Product goal and scope
 
+**Authorized follow-up — English/Spanish interface:** The owner requested a complete Spanish translation with a top-header button to switch between Spanish and English. English remains the initial fallback; an explicit selection is stored as a device/browser preference, independently of guest and account plans. Switching must not reload routes, reset form drafts, rewrite user names, change canonical muscles/weekday values or alter workout history. Translate interface copy, validation/recovery messages, accessible names, unchanged starter display names and locale-formatted dates/weights. Keep the current responsive layout and working account flows. [LANGUAGES.md](LANGUAGES.md) documents the translation boundary and checks. Code and technical documentation remain English.
+
 Build a responsive application that lets a person organize gym exercises and recurring weekly routines, view today's planned workout, mark it finished, and review completion across the current week. The application must work on desktop and mobile and preserve data after refresh or browser restart.
 
 ### Required local functionality

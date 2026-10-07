@@ -1,3 +1,4 @@
+import { useLanguage } from '../i18n/useLanguage.js'
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useStorage } from '../app/useStorage.js'
@@ -9,6 +10,7 @@ import DeleteExerciseDialog from './DeleteExerciseDialog.jsx'
 import { Button, ButtonLink } from './Button.jsx'
 
 export default function ExerciseForm({ exercise }) {
+  const { t, exerciseName } = useLanguage()
   const { data, saveExercise, deleteExercise } = useStorage()
   const navigate = useNavigate()
   const [draft, setDraft] = useState({ name: exercise?.name ?? '', muscle: exercise?.muscle ?? '', image: exercise?.image ?? null })
@@ -66,22 +68,22 @@ export default function ExerciseForm({ exercise }) {
   return (
     <>
       <form className="exercise-form" onSubmit={submit} noValidate aria-busy={saving || imageBusy}>
-        <TextField label="Exercise name" placeholder="e.g. Cable fly" value={draft.name} onChange={(event) => update('name', event.target.value)} error={errors.name} ref={nameRef} required disabled={saving} />
+        <TextField label={t("Exercise name")} placeholder={t("e.g. Cable fly")} value={exerciseName({ ...exercise, ...draft })} onChange={(event) => update('name', event.target.value)} error={errors.name} ref={nameRef} required disabled={saving} />
         <div className="field">
-          <label className="field__label" htmlFor="exercise-muscle">Target muscle</label>
+          <label className="field__label" htmlFor="exercise-muscle">{t("Target muscle")}</label>
           <select className="field__input" id="exercise-muscle" ref={muscleRef} value={draft.muscle} onChange={(event) => update('muscle', event.target.value)} required disabled={saving} aria-invalid={errors.muscle ? true : undefined} aria-describedby={errors.muscle ? 'exercise-muscle-error' : undefined}>
-            <option value="">Select muscle</option>
+            <option value="">{t("Select muscle")}</option>
             {draft.muscle && !MUSCLES.includes(draft.muscle) && <option value={draft.muscle}>{draft.muscle}</option>}
-            {MUSCLES.map((muscle) => <option key={muscle}>{muscle}</option>)}
+            {MUSCLES.map((muscle) => <option key={muscle} value={muscle}>{t(muscle)}</option>)}
           </select>
-          {errors.muscle && <p className="field__error" id="exercise-muscle-error">{errors.muscle}</p>}
+          {errors.muscle && <p className="field__error" id="exercise-muscle-error">{t(errors.muscle)}</p>}
         </div>
         <ExerciseImageField image={draft.image} defaultImage={getDefaultExerciseImage({ ...exercise, ...draft })} inputRef={imageRef} onChange={(image) => update('image', image)} error={imageError || errors.image} onError={(message) => { setImageError(message); setErrors((current) => ({ ...current, image: '' })) }} busy={imageBusy} setBusy={setImageBusy} disabled={saving} />
-        {saveError && <p className="field__error" role="alert">{saveError}</p>}
+        {saveError && <p className="field__error" role="alert">{t(saveError)}</p>}
         <div className="exercise-form__actions">
-          <Button type="submit" disabled={saving || imageBusy}>{saving ? 'Saving…' : editing ? 'Save changes' : 'Create exercise'}</Button>
-          {editing && <Button variant="danger" disabled={saving || imageBusy} onClick={() => setDeleteOpen(true)}>Delete exercise</Button>}
-          <ButtonLink variant="text" to="/exercises">Cancel</ButtonLink>
+          <Button type="submit" disabled={saving || imageBusy}>{saving ? t("Saving…") : editing ? t("Save changes") : t("Create exercise")}</Button>
+          {editing && <Button variant="danger" disabled={saving || imageBusy} onClick={() => setDeleteOpen(true)}>{t("Delete exercise")}</Button>}
+          <ButtonLink variant="text" to="/exercises">{t("Cancel")}</ButtonLink>
         </div>
       </form>
       {exercise && <DeleteExerciseDialog exercise={exercise} assignmentCount={countExerciseAssignments(data.routines, exercise.id)} open={deleteOpen} onClose={() => setDeleteOpen(false)} onDelete={remove} />}

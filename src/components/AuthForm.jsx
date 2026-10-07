@@ -1,3 +1,4 @@
+import { useLanguage } from '../i18n/useLanguage.js'
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useAuth } from '../app/useAuth.js'
@@ -7,6 +8,7 @@ import { Button, ButtonLink } from './Button.jsx'
 
 const actions = { login: 'Log in', signup: 'Create account', reset: 'Send recovery email', password: 'Save new password' }
 export default function AuthForm({ mode }) {
+  const { t } = useLanguage()
   const { auth, signOut, configured, configError, error, user } = useAuth()
   const navigate = useNavigate()
   const [draft, setDraft] = useState({ email: '', password: '', confirmation: '' })
@@ -60,17 +62,17 @@ export default function AuthForm({ mode }) {
     finally { lock.current = false; setBusy(false) }
   }
   return <form className="auth-form" onSubmit={submit} noValidate aria-busy={busy}>
-    {!configured && <p className="auth-notice" role="status">{configError || 'Account sign-in is unavailable here. Continue as a guest to use all local features.'}</p>}
-    {error && <p className="field__error" role="alert">{error.message} Request a new email link and open it in the same browser.</p>}
-    {mode !== 'password' && <TextField label="Email" type="email" autoComplete="email" autoCapitalize="none" value={draft.email} ref={emailRef} onChange={(event) => update('email', event.target.value)} error={errors.email} disabled={busy || !configured} required />}
-    {hasPassword && <TextField label={mode === 'password' ? 'New password' : 'Password'} type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} value={draft.password} ref={passwordRef} onChange={(event) => update('password', event.target.value)} error={errors.password} hint={hasConfirmation ? 'Use at least 8 characters.' : undefined} disabled={busy || !configured} required />}
-    {hasConfirmation && <TextField label="Confirm password" type="password" autoComplete="new-password" value={draft.confirmation} ref={confirmationRef} onChange={(event) => update('confirmation', event.target.value)} error={errors.confirmation} disabled={busy || !configured} required />}
-    {failure && <p className="field__error" role="alert">{failure}</p>}
-    {message && <p className="auth-success" role="status">{message}</p>}
-    <Button type="submit" disabled={busy || !configured}>{busy ? 'Please wait…' : actions[mode]}</Button>
+    {!configured && <p className="auth-notice" role="status">{t(configError) || t("Account sign-in is unavailable here. Continue as a guest to use all local features.")}</p>}
+    {error && <p className="field__error" role="alert">{t(error.message)}{' '}{t("Request a new email link and open it in the same browser.")}</p>}
+    {mode !== 'password' && <TextField label={t("Email")} type="email" autoComplete="email" autoCapitalize="none" value={draft.email} ref={emailRef} onChange={(event) => update('email', event.target.value)} error={errors.email} disabled={busy || !configured} required />}
+    {hasPassword && <TextField label={mode === 'password' ? t("New password") : t("Password")} type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} value={draft.password} ref={passwordRef} onChange={(event) => update('password', event.target.value)} error={errors.password} hint={hasConfirmation ? t("Use at least 8 characters.") : undefined} disabled={busy || !configured} required />}
+    {hasConfirmation && <TextField label={t("Confirm password")} type="password" autoComplete="new-password" value={draft.confirmation} ref={confirmationRef} onChange={(event) => update('confirmation', event.target.value)} error={errors.confirmation} disabled={busy || !configured} required />}
+    {failure && <p className="field__error" role="alert">{t(failure)}</p>}
+    {message && <p className="auth-success" role="status">{t(message)}</p>}
+    <Button type="submit" disabled={busy || !configured}>{busy ? t("Please wait…") : t(actions[mode])}</Button>
     <div className="auth-links">
-      {mode === 'login' ? <><ButtonLink to="/signup" variant="text">Create an account</ButtonLink><ButtonLink to="/forgot-password" variant="text">Forgot password?</ButtonLink></> : <ButtonLink to="/login" variant="text">Back to account</ButtonLink>}
-      {user ? <Button variant="secondary" disabled={busy} onClick={continueAsGuest}>Continue as guest</Button> : <ButtonLink to="/" variant="secondary">Continue as guest</ButtonLink>}
+      {mode === 'login' ? <><ButtonLink to="/signup" variant="text">{t("Create an account")}</ButtonLink><ButtonLink to="/forgot-password" variant="text">{t("Forgot password?")}</ButtonLink></> : <ButtonLink to="/login" variant="text">{t("Back to account")}</ButtonLink>}
+      {user ? <Button variant="secondary" disabled={busy} onClick={continueAsGuest}>{t("Continue as guest")}</Button> : <ButtonLink to="/" variant="secondary">{t("Continue as guest")}</ButtonLink>}
     </div>
   </form>
 }

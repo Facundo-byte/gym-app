@@ -12,6 +12,8 @@ Routes compose reusable buttons, fields, cards and native dialogs. Styles use sh
 
 ## Domain rules and operations
 
+`LanguageProvider` wraps `App` above the identity scope. Its English/Spanish preference survives navigation and account changes without remounting forms. `i18n/` translates presentation copy, accessible names, validation/recovery messages and unchanged starter display names; it also handles accent-insensitive search and locale-formatted dates/weights. User names, canonical muscle options, ISO weekdays, saved snapshots and service errors stay in their original form. `storage.js` owns the separate `forge:language` preference key and catches access/write failures; a failed preference write does not block the session's language switch. See [LANGUAGES.md](LANGUAGES.md) for maintenance.
+
 `domain/` holds pure validation, local date arithmetic, assignment ordering, snapshot scheduling and progress selection. `gymService` serializes operations in one scope, clones input/data, applies domain transformations, validates/reconciles the document and publishes only after the adapter confirms saving. Related cascades, completion and recovery save together as one document change.
 
 Its promise-based API covers load/inspect, library/routine/assignment operations, today's preparation/completion, progress, recovery, diagnostic export and confirmed guest import. Keep UI independent of adapter details; do not duplicate numeric validation, completion identity or snapshot rules in JSX.

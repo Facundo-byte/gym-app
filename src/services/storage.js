@@ -3,6 +3,23 @@ export const SCHEMA_VERSION = 1
 const MAX_DOCUMENT_BYTES = 3 * 1024 * 1024
 const collections = ['exercises', 'routines', 'weeklySchedules', 'workoutLogs']
 
+export const LANGUAGE_KEY = 'forge:language'
+
+// A device preference stays separate from guest plans and account documents.
+export function createLanguagePreference({ getStorage = () => window.localStorage } = {}) {
+  return {
+    load() {
+      try { return getStorage().getItem(LANGUAGE_KEY) === 'es' ? 'es' : 'en' }
+      catch { return 'en' }
+    },
+    save(language) {
+      if (!['en', 'es'].includes(language)) return false
+      try { getStorage().setItem(LANGUAGE_KEY, language); return true }
+      catch { return false }
+    },
+  }
+}
+
 export class StorageError extends Error {
   constructor(code, message, cause) {
     super(message, { cause })

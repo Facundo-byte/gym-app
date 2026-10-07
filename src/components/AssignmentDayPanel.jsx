@@ -1,3 +1,4 @@
+import { useLanguage } from '../i18n/useLanguage.js'
 import { useEffect, useRef, useState } from 'react'
 import { useStorage } from '../app/useStorage.js'
 import { countMissingExercises, weekdayName } from '../domain/routines.js'
@@ -8,6 +9,7 @@ import ConfirmActionDialog from './ConfirmActionDialog.jsx'
 import { ButtonLink } from './Button.jsx'
 
 export default function AssignmentDayPanel({ routine, day, exercises }) {
+  const { t, exerciseName } = useLanguage()
   const { removeAssignment, reorderAssignments } = useStorage()
   const [removeTarget, setRemoveTarget] = useState(null)
   const [busy, setBusy] = useState(false)
@@ -73,21 +75,21 @@ export default function AssignmentDayPanel({ routine, day, exercises }) {
     <>
       <Card id="routine-day-panel" role="region" aria-labelledby="routine-day-title">
         <div className="assignment-day-heading">
-          <div><h2 id="routine-day-title">{weekdayName(day.dayOfWeek)}</h2><p>{day.assignments.length} {day.assignments.length === 1 ? 'exercise assignment' : 'exercise assignments'}</p></div>
-          <ButtonLink ref={addRef} to={`${basePath}/new`} onClick={(event) => { if (busy) event.preventDefault() }} aria-disabled={busy || undefined}>+ Add exercise</ButtonLink>
+          <div><h2 id="routine-day-title">{t(weekdayName(day.dayOfWeek))}</h2><p>{t(day.assignments.length === 1 ? '{count} exercise assignment' : '{count} exercise assignments', { count: day.assignments.length })}</p></div>
+          <ButtonLink ref={addRef} to={`${basePath}/new`} onClick={(event) => { if (busy) event.preventDefault() }} aria-disabled={busy || undefined}>{t("+ Add exercise")}</ButtonLink>
         </div>
-        {missing > 0 && <p className="routine-reference-notice" role="status">{missing} {missing === 1 ? 'saved assignment refers' : 'saved assignments refer'} to a missing exercise. Edit it to choose a replacement, or remove it. Your saved data has been kept.</p>}
+        {missing > 0 && <p className="routine-reference-notice" role="status">{t(missing === 1 ? '{count} saved assignment refers to a missing exercise. Edit it to choose a replacement, or remove it. Your saved data has been kept.' : '{count} saved assignments refer to a missing exercise. Edit it to choose a replacement, or remove it. Your saved data has been kept.', { count: missing })}</p>}
         {day.assignments.length ? (
-          <ol className="assignment-list" aria-label={`${weekdayName(day.dayOfWeek)} exercises`}>
+          <ol className="assignment-list" aria-label={t('{day} exercises', { day: t(weekdayName(day.dayOfWeek)) })}>
             {day.assignments.map((assignment, index) => <AssignmentRow key={assignment.id} assignment={assignment} exercise={exercises.find((exercise) => exercise.id === assignment.exerciseId)} index={index} total={day.assignments.length} editPath={`${basePath}/${encodeURIComponent(assignment.id)}/edit`} busy={busy} onMove={move} onRemove={(item) => { setError(''); setRemoveTarget(item) }} />)}
           </ol>
-        ) : <EmptyState headingLevel={3} title={`No exercises for ${weekdayName(day.dayOfWeek)} yet`} description="Choose an exercise from your library and set its targets for this training day." />}
-        {error && !removeTarget && <p className="field__error" role="alert">{error}</p>}
-        {message && <p className="routine-status" role="status">{message}</p>}
+        ) : <EmptyState headingLevel={3} title={t('No exercises for {day} yet', { day: t(weekdayName(day.dayOfWeek)) })} description={t("Choose an exercise from your library and set its targets for this training day.")} />}
+        {error && !removeTarget && <p className="field__error" role="alert">{t(error)}</p>}
+        {message && <p className="routine-status" role="status">{t(message)}</p>}
       </Card>
-      <ConfirmActionDialog open={Boolean(removeTarget)} title="Remove exercise from day?" confirmLabel="Remove assignment" onConfirm={remove} onClose={() => { setRemoveTarget(null); setError('') }} busy={busy} error={error}>
-        <p>Remove “{selectedExercise?.name ?? 'Missing exercise'}” from {weekdayName(day.dayOfWeek)} in “{routine.name}”?</p>
-        <p>This removes only this occurrence. Other training days, library exercises, and past workout history will be kept.</p>
+      <ConfirmActionDialog open={Boolean(removeTarget)} title={t("Remove exercise from day?")} confirmLabel={t("Remove assignment")} onConfirm={remove} onClose={() => { setRemoveTarget(null); setError('') }} busy={busy} error={error}>
+        <p>{t('Remove “{name}” from {day} in “{routine}”?', { name: exerciseName(selectedExercise), day: t(weekdayName(day.dayOfWeek)), routine: routine.name })}</p>
+        <p>{t("This removes only this occurrence. Other training days, library exercises, and past workout history will be kept.")}</p>
       </ConfirmActionDialog>
     </>
   )
