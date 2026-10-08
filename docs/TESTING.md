@@ -16,6 +16,7 @@ npm test
 npm run test:coverage
 npm run test:e2e
 npm run test:auth
+npm run test:pwa
 ```
 
 The browser installation is required once per machine, and again when Playwright's browser revision changes. It is separate from `npm ci`. The default browser is Playwright's managed Chromium; no Chrome/Edge installation or login is needed.
@@ -39,7 +40,7 @@ The complete journey attaches configured-day and completed-workout screenshots a
 
 ## Coverage and ownership
 
-There are 124 native tests: the original 105 local tests, 13 account/service tests, one PostgreSQL migration/policy integration test, and five translation/preference tests. They exercise domain rules through the service boundary, focused storage/image adapters, auth validation/delegation, identity changes, private-image round trips, async revision checks, failed writes, confirmed import, and PostgreSQL permissions. `npm test` runs `*.test.js`; browser specs use `*.spec.js` and run separately.
+There are 129 native tests: the original 105 local tests, 13 account/service tests, one PostgreSQL migration/policy integration test, five translation/preference tests and five worker-lifecycle tests. They exercise domain rules through the service boundary, focused storage/image adapters, auth validation/delegation, identity changes, private-image round trips, async revision checks, failed writes, confirmed import, PostgreSQL permissions and explicitly accepted updates. `npm test` runs `*.test.js`; browser specs use `*.spec.js` and run separately.
 
 | Behavior | Primary native coverage | Browser acceptance coverage |
 | --- | --- | --- |
@@ -92,7 +93,23 @@ For live verification, configure the project/migration and two unused confirmed 
 
 After that successful API run, `npm run test:auth:live` uses the normal preview on port 4173 with new desktop/mobile Chromium contexts and real credentials. It edits only the named API fixture, verifies actual UI/SDK sync, private images, stale drafts, logout/guest continuation and account B separation, and keeps screenshots locally in ignored `test-results/live/`. No password-bearing traces/reports are recorded. These opt-in live checks are separate from repeatable fixture suites; rerunning requires the documented unused accounts/original fixture.
 
+## PWA scenarios
+
+`npm run test:pwa` builds into ignored `.pwa-test-dist/` with synthetic public account configuration and starts its own static SPA server on port **4177**. Keep that port free. It runs eight executions at 1440 × 900 and 390 × 844, with actual generated service workers enabled:
+
+- Manifest scope/standalone mode, decoded regular/maskable icon sizes and Chromium's installability diagnostics; no initial-install update prompt.
+- Cold offline guest navigation/refresh, assignment saves, uploaded images and precached starter illustrations.
+- English/Spanish installation help, keyboard focus, draft retention, canceled install and installed-state button removal.
+- A genuinely changed worker script waiting until accepted, Later preserving drafts, and another tab's acceptance not forcing an unsaved form to reload.
+- A held account save blocking update acceptance; failed offline account saves retaining input and last confirmed state; private images/API documents absent from CacheStorage; browser PKCE recovery and account B isolation.
+
+The private server's revision endpoint changes only a comment in its served worker script to exercise the real lifecycle. It never modifies production files. There is no production test endpoint. Network emulation additionally aborts synthetic Supabase routes because fixture fulfillment can otherwise succeed offline. Installability diagnostics detach their temporary CDP session before offline emulation. Native OS prompts/standalone state are simulated; headless tests do not install an app on a phone. Actual emails and deployed policies remain outside fixture evidence.
+
+`src/pwa/updates.test.js` covers first-install behavior, waiting worker acceptance, reload ownership across tabs, registration failure and disposal of late asynchronous results/listeners. Screenshots and traces are in ignored `pwa-test-results/`; inspect the report with `npx playwright show-report playwright-pwa-report`. The runner owns and closes its server/contexts and never uses the user's profile or real credentials. [PWA.md](PWA.md) includes publication, icon replacement and physical-device checks.
+
 ## Isolation
+
+The core/account suites block service workers so intercepted missing-file/network failures cannot be bypassed by a public-asset cache. The separate PWA suite allows the real generated worker and verifies cache behavior directly.
 
 Every browser test gets a new disposable context and starts without saved routines or history. Creating the second tab in the same context deliberately shares storage for the stale-save case. Test data, upload pixels, downloads, storage faults, and clock changes remain inside those contexts. Native tests use injected in-memory adapters and controlled clocks. Neither suite changes the user's system clock or browser profile.
 
@@ -120,6 +137,10 @@ The checked-in browser suite currently uses Chromium only; mobile is emulated, n
 Figma Starter-plan tool access remained blocked through Milestone 11. Visual review uses the existing documented reference, tokens, and rendered application; no fresh pixel comparison with unavailable frames is claimed. Local storage remains device/browser specific and cannot guarantee a transaction between simultaneously writing tabs. Download exports do not provide a restore/import UI. Account authentication/synchronization are available when configured; live project checks and email delivery must be recorded separately from intercepted browser tests. See SUPABASE.md for setup and limits.
 
 ## Final verification record
+
+The October 7, 2026 authorized PWA follow-up passed lint, all **129 native tests**, the production build, **28 core browser executions**, **ten account executions** and **eight real-worker PWA executions**. Focused desktop/mobile reruns additionally passed after completing the Spanish Close label and installed signup/browser handoff assertions. Existing dependency versions were preserved. No real accounts, plans, browser profiles or dashboard settings were changed, and nothing was committed, pushed or deployed by this task.
+
+Installation, update confirmation, offline guest library and installed recovery screenshots were visually reviewed at 390/1440 px. A separate disposable review at 280/320/768/1024 px passed Spanish installation/cancellation with retained form input, installed recovery, no horizontal overflow and no uncaught errors. Its screenshots are under ignored `test-results/pwa-review/`; its private server and contexts were closed. Physical Android/iPhone installation, WebKit and production callback/deployment verification remain pending as described in [PWA.md](PWA.md). Fresh Figma comparison remains unavailable under the documented tool limit.
 
 The October 7, 2026 authorized create-from-routine follow-up passed lint, all 124 native tests, the production build, all 28 production browser executions and all ten account fixture executions. The new English/Spanish picker/creator/selected-result screenshots were reviewed at 390 and 1440 px. An additional disposable Spanish flow at 280/768/1024 px verified visible return controls, cancellation with retained targets, new-exercise selection and no horizontal overflow or uncaught errors; screenshots are under ignored `test-results/flow-review/`. The private review server and contexts were closed. Existing Figma references and application tokens guided this addition; fresh Figma access remains unavailable under the documented Starter-plan limit. No live user plans or real Supabase accounts were changed by these checks.
 

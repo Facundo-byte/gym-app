@@ -1,0 +1,8 @@
+.app-shell { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+.app-footer { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
+.pwa-update-notice { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-6); padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-control); background: var(--color-surface); }
+.pwa-update-notice p, .pwa-connection-notice { font-size: 14px; line-height: 1.7; color: var(--color-muted); }
+.pwa-connection-notice { margin-bottom: var(--space-5); }
+.pwa-install-steps { padding-left: var(--space-5); display: grid; gap: var(--space-3); }
+.pwa-email-help { display: grid; gap: var(--space-5); color: var(--color-muted); font-size: 14px; line-height: 1.8; }
+.pwa-email-help .button { justify-self: start; }

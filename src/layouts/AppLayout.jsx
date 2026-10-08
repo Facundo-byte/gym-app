@@ -7,6 +7,7 @@ import Dialog from '../components/Dialog.jsx'
 import StorageNotice from '../components/StorageNotice.jsx'
 import { useStorage } from '../app/useStorage.js'
 import { useAuth } from '../app/useAuth.js'
+import { InstallAppButton, PwaStatus } from '../components/PwaControls.jsx'
 
 export default function AppLayout() {
   const { t, language } = useLanguage()
@@ -31,12 +32,14 @@ export default function AppLayout() {
       <a className="skip-link button button--primary" href="#main-content">{t("Skip to content")}</a>
       <Header />
       <main className="main-content" id="main-content" ref={mainRef} tabIndex={-1}>
+        <PwaStatus />
         <StorageNotice />
         {notice && <p className="auth-notice account-notice" role="status">{t(notice)}</p>}
         {user && <div className="account-status"><Link to="/login">{t("Account data")}</Link><span>{user.email}{' '}{t("· Guest plans stay separate on this device.")}</span></div>}
         <Outlet />
       </main>
       <footer className="app-footer">
+        <InstallAppButton />
         <Button variant="text" onClick={() => setPrivacyOpen(true)}>{user ? t("About your data") : t("About local storage")}</Button>
       </footer>
       <Dialog open={privacyOpen} title={user ? t("Your account and guest data") : t("Your data stays on this device")} onClose={() => setPrivacyOpen(false)} actions={<Button onClick={() => setPrivacyOpen(false)}>{t("Got it")}</Button>}>

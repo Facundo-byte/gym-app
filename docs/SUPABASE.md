@@ -14,9 +14,11 @@ Milestone 10 adds optional Supabase accounts. Guest mode retains the complete lo
    http://localhost:5173/account/password
    http://127.0.0.1:4173/login
    http://127.0.0.1:4173/account/password
+   https://forgegym-henna.vercel.app/login
+   https://forgegym-henna.vercel.app/account/password
    ```
 
-   `localhost` and `127.0.0.1` are different origins. PKCE confirmation/recovery links must open in the browser/origin that requested them. Add HTTPS production equivalents when hosting is authorized. Verify email delivery and SMTP restrictions before relying on these flows. See the official [password authentication guide](https://supabase.com/docs/guides/auth/passwords).
+   The owner's supplied production Site URL is `https://forgegym-henna.vercel.app`. Verify the URLs in the dashboard; the repository does not change its allowlist. `localhost` and `127.0.0.1` are different origins. PKCE links must open in the browser/origin that requested them. Installed apps may have separate sessions, so their signup/recovery screens open the browser to request and complete emails there; return to the app to log in. See [PWA.md](PWA.md) and the official [password authentication guide](https://supabase.com/docs/guides/auth/passwords). Verify production email delivery and SMTP restrictions before relying on these flows.
 5. Run FORGE. Create and confirm an account, then sign in. New accounts start with starter exercises and no guest routines/history. Use **Account → Review guest import** only to explicitly copy guest plans.
 
 Only a public key belongs in a `VITE_` variable: Vite embeds it in the browser build. Never put secret keys, `service_role` JWTs, database passwords, or SMTP passwords there. Invalid/incomplete configuration falls back to guest use. Supabase explains these distinctions in its [API key guide](https://supabase.com/docs/guides/getting-started/api-keys).

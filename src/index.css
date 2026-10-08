@@ -7,6 +7,7 @@
 @import './styles/workouts.css';
 @import './styles/progress.css';
 @import './styles/accounts.css';
+@import './styles/pwa.css';
 
 * { box-sizing: border-box; }
 :root {

@@ -15,6 +15,7 @@ Milestones 1–11 implement the authorized scope. [The final acceptance report](
 - Optional signup, login, confirmation/recovery emails, password change, logout, private images, confirmed guest import into an unused account and remote revision conflicts.
 - Responsive layouts, keyboard navigation, accessible labels/errors/dialogs, visible focus, readable weekday states and locally bundled Manrope.
 - English/Spanish interface with a header language button, remembered browser preference, translated starter names/search and localized dates, weights and messages. User-written names and saved plans keep their original values; see [LANGUAGES.md](docs/LANGUAGES.md).
+- Installable PWA with FORGE icons, English/Spanish installation help, offline guest use after initial preparation, connection notices and user-controlled updates. Accounts retain the same Supabase backend and require a connection. See [PWA.md](docs/PWA.md) for Vercel publication, phone installation and email/browser handoff.
 
 Nine starter exercises are saved once for a new guest installation or account, with matching bundled illustrations available to existing libraries too. Uploaded personal images take priority. Replace their files or change the central catalog as described in [EXERCISE_IMAGES.md](docs/EXERCISE_IMAGES.md); defaults do not consume document storage or require a Supabase migration. No demo routines or fake completions are created. Deleting every exercise keeps the library empty after refresh.
 
@@ -40,6 +41,8 @@ npm run preview -- --host 127.0.0.1 --port 4173 --strictPort
 
 Open [the local preview](http://127.0.0.1:4173). If the port is already used, stop your existing preview or choose another port and configure that origin's account callbacks. Preview serves `dist/`; it does not rebuild automatically.
 
+The PWA worker runs in production builds only. Development edits stay immediate; use build/preview to review installation, caching and updates. The supplied public origin is `https://forgegym-henna.vercel.app/`; this local PWA work must be published before phone installation. `vercel.json` supplies nested-route fallback and worker/manifest cache headers. Existing build-time Supabase public variables remain required for accounts. Follow [the publication and installation steps](docs/PWA.md).
+
 ## Verify the project
 
 ```sh
@@ -49,15 +52,19 @@ npm run test:coverage
 npx playwright install chromium
 npm run test:e2e
 npm run test:auth
+npm run test:pwa
 ```
 
 Chromium installation is required once per locked Playwright browser revision. `test:e2e` builds normal production output and runs 28 isolated executions at 390/768/1024/1440 px on port **4175**. `test:auth` builds separately to `.auth-test-dist/` and runs ten desktop/mobile account executions with intercepted fixture HTTP on port **4176**. Both include Spanish acceptance scenarios. Keep those ports free. Tests do not use real account credentials or the user's browser profile; their servers are never reused.
+
+`test:pwa` builds separately to `.pwa-test-dist/` and runs eight desktop/mobile executions on port **4177**, including the real generated worker, cold offline guest use, waiting updates, cross-tab draft protection, account cache isolation and browser recovery. Core/account suites block workers to keep injected network faults deterministic; the PWA suite explicitly allows them. OS installation events are simulated, and physical Android/iPhone installation needs the documented review.
 
 `npm test` uses Node's native runner, including the actual migration in PostgreSQL/PGlite. Coverage measures domain/services, excluding React, SQL, SDK internals and browser execution. Playwright and PGlite are development dependencies; Supabase is the optional account runtime. Reports/screenshots are ignored by Git:
 
 ```sh
 npm run test:e2e:report
 npx playwright show-report playwright-auth-report
+npx playwright show-report playwright-pwa-report
 ```
 
 Opt-in real-project checks are separate: `npm run test:sync:live` uses two unused disposable accounts; `npm run test:auth:live` checks its named fixture through desktop/mobile browsers with the normal preview on port 4173. They write test data and require ignored `.env.smoke.local`. Follow [the live-check instructions](docs/SUPABASE.md#verification), including restrictions on rerunning against used accounts. Do not use normal plans for these checks. [TESTING.md](docs/TESTING.md) maps scenarios, isolation, clocks, reports and manual checks.
@@ -74,12 +81,14 @@ src/
   config/       Central starter-exercise names, muscles and bundled illustration paths
   domain/       Pure validation, dates, scheduling, snapshots and weekly calculations
   i18n/         Language context, Spanish copy and localized presentation helpers
+  pwa/          Installation state, worker registration and voluntary updates
   layouts/      Responsive navigation and application shell
   pages/        Lists, editors, day details, Home and account screens
   services/     Gym operations, local storage, authentication, remote data/images
   styles/       Visual tokens and responsive CSS
 docs/           Specification, setup, testing, architecture and acceptance reports
 public/images/  Bundled default exercise illustrations, served with the application
+public/icons/   Source SVG and committed regular, maskable and Apple PWA icons
 e2e/            Disposable journeys, storage/date cases and account fixtures
 supabase/       Initial migration, PostgreSQL policy test and credential template
 scripts/        Opt-in live provider/API/browser checks
@@ -123,4 +132,4 @@ Account work requires a connection. Conflicts retain drafts and require copying 
 
 Browser automation uses Chromium; mobile is emulated. Physical keyboards/phones, WebKit and screen-reader speech need separate review. Guest stale-tab checks cannot guarantee a transaction between simultaneous writers. Figma tool access remains blocked by the Starter-plan limit; existing verified references/tokens and rendered layouts are reviewed without claiming a fresh pixel comparison. Evidence is in [Milestone 7](docs/MILESTONE_7_AUDIT.md), [Milestone 9](docs/MILESTONE_9_ACCEPTANCE.md), [Milestone 10](docs/MILESTONE_10_ACCEPTANCE.md) and [Milestone 11](docs/MILESTONE_11_ACCEPTANCE.md). Historical reports describe their original scope.
 
-Publishing/deployment is separate. Hosting requires an SPA fallback to `index.html`, build-time public Supabase configuration and correct callback origins. Additional browser coverage, image cleanup, general backup restoration, offline merging or new training features require a separate request.
+Publishing/deployment is separate. The prepared Vercel configuration provides an SPA fallback to `index.html`; hosting still needs build-time public Supabase configuration and correct callback origins. [PWA.md](docs/PWA.md) describes the owner's production URL and remaining physical-device checks. Additional browser coverage, image cleanup, general backup restoration, offline account merging or new training features require a separate request.

@@ -4,6 +4,7 @@ import { StorageContext } from './StorageContext.js'
 
 export default function StorageProvider({ children, service, mode }) {
   const [state, setState] = useState({ status: 'loading', data: null, error: null, recovery: null, dangling: [], noticeError: null })
+  const [pendingSaves, setPendingSaves] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -38,6 +39,7 @@ export default function StorageProvider({ children, service, mode }) {
   }, [service])
 
   const run = useCallback(async (operation) => {
+    setPendingSaves(count => count + 1)
     try {
       const data = await operation()
       setState((current) => ({ ...current, status: 'ready', data, error: null, recovery: null, dangling: findDanglingAssignments(data) }))
@@ -45,6 +47,8 @@ export default function StorageProvider({ children, service, mode }) {
     } catch (error) {
       if (error.code === 'stale') setState((current) => ({ ...current, noticeError: error }))
       throw error
+    } finally {
+      setPendingSaves(count => count - 1)
     }
   }, [])
 
@@ -87,5 +91,5 @@ export default function StorageProvider({ children, service, mode }) {
     return run(() => service.completeWorkout(routineId, date))
   }, [run, service])
 
-  return <StorageContext value={{ ...state, mode, retry, reset, applyRecovery, importGuestData, exportSavedData: service.exportSavedData, saveExercise, deleteExercise, saveRoutine, deleteRoutine, saveAssignment, removeAssignment, reorderAssignments, prepareTodayWorkouts, completeWorkout }}>{children}</StorageContext>
+  return <StorageContext value={{ ...state, mode, pendingSaves, retry, reset, applyRecovery, importGuestData, exportSavedData: service.exportSavedData, saveExercise, deleteExercise, saveRoutine, deleteRoutine, saveAssignment, removeAssignment, reorderAssignments, prepareTodayWorkouts, completeWorkout }}>{children}</StorageContext>
 }

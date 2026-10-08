@@ -20,6 +20,9 @@ auth-test-results/
 playwright-auth-report/
 .auth-test-dist/
 .guest-test-dist/
+.pwa-test-dist/
+pwa-test-results/
+playwright-pwa-report/
 
 # Editor directories and files
 .vscode/*

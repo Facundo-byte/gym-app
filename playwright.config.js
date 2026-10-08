@@ -4,7 +4,7 @@ const baseURL = 'http://127.0.0.1:4175'
 
 export default defineConfig({
   testDir: './e2e',
-  testIgnore: '**/auth/**',
+  testIgnore: ['**/auth/**', '**/pwa/**'],
   fullyParallel: true,
   forbidOnly: true,
   retries: 0,
@@ -13,6 +13,9 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL,
+    // Keep network/storage fault injection deterministic. The separate PWA
+    // suite explicitly allows and verifies the real generated worker.
+    serviceWorkers: 'block',
     browserName: 'chromium',
     channel: process.env.PLAYWRIGHT_CHANNEL || undefined,
     timezoneId: 'America/Argentina/Buenos_Aires',
